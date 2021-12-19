@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_constraint_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Spinner
+        android:id="@+id/year_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:layout_constraintEnd_toStartOf="@+id/month_spinner"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/month_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/day_spinner"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/year_spinner"
+        app:layout_constraintTop_toTopOf="@+id/year_spinner" />
+
+    <Spinner
+        android:id="@+id/day_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/month_spinner"
+        app:layout_constraintTop_toTopOf="@+id/month_spinner" />
+
+    <TextView
+        android:id="@+id/textViewBlank"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/textViewMon"
+        app:layout_constraintHorizontal_weight="2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/year_spinner" />
+
+    <TextView
+        android:id="@+id/textViewMon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="M"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewBlank"
+        app:layout_constraintEnd_toStartOf="@+id/textViewTue"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/textViewBlank" />
+
+    <TextView
+        android:id="@+id/textViewTue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="T"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewMon"
+        app:layout_constraintEnd_toStartOf="@+id/textViewWed"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/textViewMon" />
+
+    <TextView
+        android:id="@+id/textViewWed"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="W"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewTue"
+        app:layout_constraintEnd_toStartOf="@+id/textViewThu"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/textViewTue" />
+
+    <TextView
+        android:id="@+id/textViewThu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="T"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewWed"
+        app:layout_constraintEnd_toStartOf="@+id/textViewFri"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/textViewWed" />
+
+    <TextView
+        android:id="@+id/textViewFri"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="F"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewThu"
+        app:layout_constraintEnd_toStartOf="@+id/textViewSat"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/textViewThu" />
+
+    <TextView
+        android:id="@+id/textViewSat"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="S"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewFri"
+        app:layout_constraintEnd_toStartOf="@+id/textViewSun"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/textViewFri" />
+
+    <TextView
+        android:id="@+id/textViewSun"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="S"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewSat"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/textViewSat" />
+
+    <Button
+        android:id="@+id/prev_button"
+        android:layout_width="204dp"
+        android:layout_height="wrap_content"
+        android:text="Previous"
+        app:layout_constraintBottom_toBottomOf="@+id/next_button"
+        app:layout_constraintEnd_toStartOf="@+id/next_button"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/next_button"
+        android:layout_width="204dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:text="Next"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/prev_button" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
