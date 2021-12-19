@@ -25,7 +25,7 @@ import kotlin.collections.ArrayList
 class MainActivity : AppCompatActivity() {
 
     var selectedDate: LocalDate = LocalDate.now()
-    var scheduleViews: ArrayList<View> = ArrayList(0)
+    var scheduleViews: ArrayList<Array<TextView?>> = ArrayList(0)
     lateinit var yearSpinner: Spinner
     lateinit var monthSpinner: Spinner
     lateinit var daySpinner: Spinner
@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initializeDateSpinners()
         initializeDateButtons()
+        initializeScheduleViews()
         updateSelectedDate()
         updateAssignments()
     }
@@ -104,13 +105,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @Synchronized
-    fun clearScheduleViews() {
-        val mainConstraintLayout: ConstraintLayout = findViewById(R.id.main_constraint_layout)
-        scheduleViews.forEach {
-            mainConstraintLayout.removeView(it)
+    fun initializeScheduleViews() {
+        val cursor = scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments", null)
+        var rowId = R.id.textViewBlank
+        repeat(cursor.count + 1) {
+            Log.d("LENA", "testing")
+            scheduleViews.add(newRow(rowId, "Test", Array<String>(7) { it.toString() }).also { rowId = it[0]!!.id })
         }
-        scheduleViews.clear()
+        cursor.close()
     }
 
     fun updateSelectedDate(year: Int = selectedDate.year, month: Int = selectedDate.monthValue, day: Int = selectedDate.dayOfMonth) {
@@ -144,12 +146,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     fun updateAssignments() {
-        //Toast.makeText(this@MainActivity, selectedDate.toString(), Toast.LENGTH_SHORT).show()
-
-        clearScheduleViews()
-
+        var rowIndex: Int = 0
         val monday = selectedDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val sunday = selectedDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
@@ -157,7 +155,7 @@ class MainActivity : AppCompatActivity() {
         var monthText: String = DateTimeFormatter.ofPattern("MMM").format(monday)
         if (monday.month != sunday.month)
             monthText += "-" + DateTimeFormatter.ofPattern("MMM").format(sunday)
-        var rowId = addRow(R.id.textViewBlank, monthText, Array<String>(7) {
+        updateRow(rowIndex++, monthText, Array<String>(7) {
             monday.plusDays(it.toLong()).dayOfMonth.toString()
         })
 
@@ -172,19 +170,40 @@ class MainActivity : AppCompatActivity() {
                 val date = cursor.getString(0)
                 if (monday.plusDays(i.toLong()).toString() == date) {
                     assignments[i] = cursor.getString(2)
-                }
+                } else
+                    continue // find the first date with data
                 if (!cursor.moveToNext() || cursor.getString(1) != anesthesiologist) break
             }
 
-            //rowId = addRow(rowId, anesthesiologist, assignments)
-            //Log.d("LENA", "Data: $anesthesiologist ${assignments.contentToString()}")
+            updateRow(rowIndex++, anesthesiologist, assignments)
+            Log.d("LENA", "Data: $anesthesiologist ${assignments.contentToString()}")
         } while (!cursor.isAfterLast)
+
+        clearRowsStartingAt(rowIndex)
     }
 
-    fun addRow(rowAboveId: Int, anesthesiologist: String, assignment: Array<String>): Int {
+    fun updateRow(index: Int, anesthesiologist: String, assignment: Array<String>) {
+        assert(index < scheduleViews.size)
+        assert(assignment.size == scheduleViews[index].size - 1)
+        scheduleViews[index][0]!!.text = anesthesiologist
+        for (i in 1 until scheduleViews[index].size) {
+            scheduleViews[index][i]!!.text = if (assignment[i - 1].trim() == "") "-" else assignment[i - 1]
+        }
+    }
+
+    fun clearRowsStartingAt(startIndex: Int) {
+        assert(startIndex <= scheduleViews.size)
+        for (i in startIndex until scheduleViews.size)
+            for (j in 1 until scheduleViews[i].size)
+                scheduleViews[i][j]!!.text = "-" // TODO consider hiding view
+    }
+
+    fun newRow(rowAboveId: Int, anesthesiologist: String, assignment: Array<String>): Array<TextView?> {
+        var views = Array<TextView?>(assignment.size + 1) { null }
+
         val mainConstraintLayout: ConstraintLayout = findViewById(R.id.main_constraint_layout)
         var prevId: Int = View.generateViewId()
-        mainConstraintLayout.addView(TextView(this@MainActivity).also { it.text = anesthesiologist; it.id = prevId; scheduleViews.add(it) })
+        mainConstraintLayout.addView(TextView(this@MainActivity).also { it.text = anesthesiologist; it.id = prevId; views[0] = it })
         with(ConstraintSet()) {
             clone(mainConstraintLayout)
             connect(prevId, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
@@ -197,7 +216,7 @@ class MainActivity : AppCompatActivity() {
 
         var nextId: Int = View.generateViewId()
         repeat(assignment.size - 1) { i ->
-            mainConstraintLayout.addView(TextView(this@MainActivity).also { it.text = assignment[i]; it.id = nextId; scheduleViews.add(it) })
+            mainConstraintLayout.addView(TextView(this@MainActivity).also { it.text = assignment[i]; it.id = nextId; views[i + 1] = it })
             with(ConstraintSet()) {
                 clone(mainConstraintLayout)
                 connect(prevId, ConstraintSet.END, nextId, ConstraintSet.START)
@@ -211,7 +230,7 @@ class MainActivity : AppCompatActivity() {
             nextId = View.generateViewId()
         }
 
-        mainConstraintLayout.addView(TextView(this@MainActivity).also { it.text = assignment[assignment.size - 1]; it.id = nextId; scheduleViews.add(it) })
+        mainConstraintLayout.addView(TextView(this@MainActivity).also { it.text = assignment[assignment.size - 1]; it.id = nextId; views[assignment.size] = it })
         with(ConstraintSet()) {
             clone(mainConstraintLayout)
             connect(prevId, ConstraintSet.END, nextId, ConstraintSet.START)
@@ -222,6 +241,6 @@ class MainActivity : AppCompatActivity() {
             constrainWidth(nextId, 0)
             applyTo(mainConstraintLayout)
         }
-        return rowId
+        return views
     }
 }
