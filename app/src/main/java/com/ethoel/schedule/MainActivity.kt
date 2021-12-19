@@ -109,8 +109,7 @@ class MainActivity : AppCompatActivity() {
         val cursor = scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments", null)
         var rowId = R.id.textViewBlank
         repeat(cursor.count + 1) {
-            Log.d("LENA", "testing")
-            scheduleViews.add(newRow(rowId, "Test", Array<String>(7) { it.toString() }).also { rowId = it[0]!!.id })
+            scheduleViews.add(newRow(rowId, "-", Array<String>(7) { "-" }).also { rowId = it[0]!!.id })
         }
         cursor.close()
     }
@@ -176,10 +175,57 @@ class MainActivity : AppCompatActivity() {
             }
 
             updateRow(rowIndex++, anesthesiologist, assignments)
-            Log.d("LENA", "Data: $anesthesiologist ${assignments.contentToString()}")
         } while (!cursor.isAfterLast)
 
+        cursor.close()
+
         clearRowsStartingAt(rowIndex)
+
+        reorderRowsBy(LOONEY_ORDER)
+    }
+
+    fun reorderRowsBy(order: Int) {
+        when(order) {
+            LOONEY_ORDER -> {
+                val cursor = scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments ORDER BY assignment_id", null)
+                var looneyOrder = HashMap<String, Int>(cursor.count)
+                cursor.moveToFirst()
+                do {
+                    looneyOrder[cursor.getString(0)] = cursor.position + 1
+                } while (cursor.moveToNext())
+                cursor.close()
+
+                var index = 1
+                while (index < scheduleViews.size) {
+                    var looneyIndex = looneyOrder[scheduleViews[index][0]!!.text]
+                    if (looneyIndex!! != index)
+                        for (i in scheduleViews[index].indices) {
+                            var tmp = scheduleViews[index][i]!!.text
+                            scheduleViews[index][i]!!.text = scheduleViews[looneyIndex!!][i]!!.text
+                            scheduleViews[looneyIndex!!][i]!!.text = tmp
+                        }
+                    else
+                        index++
+                }
+            }
+            ALPHA_LOCUM_LAST -> {
+                var startCopying = false
+                lateinit var previousTextView: Array<TextView?>
+                scheduleViews.forEach { textView ->
+                    if (startCopying) {
+                        for (i in textView.indices) {
+                            var tmp = previousTextView[i]!!.text
+                            previousTextView[i]!!.text = textView[i]!!.text
+                            textView[i]!!.text = tmp
+                        }
+                    }
+                    if (textView[0]!!.text.trim() == "Locum") {
+                        startCopying = true
+                    }
+                    previousTextView = textView
+                }
+            }
+        }
     }
 
     fun updateRow(index: Int, anesthesiologist: String, assignment: Array<String>) {
@@ -212,7 +258,6 @@ class MainActivity : AppCompatActivity() {
             setHorizontalWeight(prevId, 2.toFloat())
             applyTo(mainConstraintLayout)
         }
-        val rowId = prevId
 
         var nextId: Int = View.generateViewId()
         repeat(assignment.size - 1) { i ->
@@ -242,5 +287,11 @@ class MainActivity : AppCompatActivity() {
             applyTo(mainConstraintLayout)
         }
         return views
+    }
+
+    companion object {
+        const val LOONEY_ORDER = 0
+        const val ALPHA_LOCUM_LAST = 1
+        const val ALPHA_WITH_LOCUM = 2
     }
 }
