@@ -14,3 +14,5 @@
 .cxx
 local.properties
 /app/src/main/assets/databases/schedule.db
+/app/debug/app-debug.aab
+/app/release/app-release.aab
