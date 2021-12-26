@@ -9,49 +9,39 @@
 
     <Spinner
         android:id="@+id/year_spinner"
+        style="@style/schedule_spinner_style"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/schedule_margin"
         android:layout_marginTop="@dimen/schedule_margin"
         android:layout_marginEnd="@dimen/inside_margin"
-        android:background="@drawable/spinner_background"
         android:contentDescription="@string/year"
-        android:elevation="@dimen/spinner_elevation"
-        android:minHeight="@dimen/min_button_height"
-        android:popupBackground="@drawable/spinner_popup_background"
         app:layout_constraintEnd_toStartOf="@+id/month_spinner"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
+        style="@style/schedule_spinner_style"
         android:id="@+id/month_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/inside_margin"
         android:layout_marginEnd="@dimen/inside_margin"
-        android:background="@drawable/spinner_background"
         android:contentDescription="@string/month"
-        android:elevation="@dimen/spinner_elevation"
-        android:minHeight="@dimen/min_button_height"
-        android:popupBackground="@drawable/spinner_popup_background"
         app:layout_constraintEnd_toStartOf="@+id/day_spinner"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/year_spinner"
         app:layout_constraintTop_toTopOf="@+id/year_spinner" />
 
     <Spinner
+        style="@style/schedule_spinner_style"
         android:id="@+id/day_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/inside_margin"
         android:layout_marginEnd="@dimen/schedule_margin"
-        android:background="@drawable/spinner_background"
         android:contentDescription="@string/day"
-        android:elevation="@dimen/spinner_elevation"
-        android:minHeight="@dimen/min_button_height"
-        android:popupBackground="@drawable/spinner_popup_background"
-        android:spinnerMode="dropdown"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/month_spinner"
@@ -167,8 +157,8 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/next_button"
         style="@style/schedule_button_style"
+        android:id="@+id/next_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/inside_margin"

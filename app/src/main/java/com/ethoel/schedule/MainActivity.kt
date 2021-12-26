@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var scheduleDatabase: SQLiteDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("LENA", "onCreate")
         super.onCreate(savedInstanceState)
         scheduleDatabase = ScheduleDatabaseHelper(this).readableDatabase
         setContentView(R.layout.activity_main)
@@ -44,11 +45,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        Log.d("LENA", "onCreateOptionsMenu")
         menuInflater.inflate(R.menu.main_menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.d("LENA", "onOptionsItemsSelected")
         when (item.itemId) {
             R.id.update_button -> Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.ethoel.schedule")).also { startActivity(it) }
         }
@@ -56,6 +59,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun initializeDateSpinners() {
+        Log.d("LENA", "initializeDateSpinners")
         // find the views
         yearSpinner = findViewById(R.id.year_spinner)
         monthSpinner = findViewById(R.id.month_spinner)
@@ -106,6 +110,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun initializeDateButtons() {
+        Log.d("LENA", "initializeDateButtons")
         val nextButton: Button = findViewById(R.id.next_button)
         nextButton.setOnClickListener {
             val next = selectedDate.plusWeeks(1)
@@ -119,6 +124,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun initializeScheduleViews() {
+        Log.d("LENA", "initializeScheduleViews")
         val cursor = scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments", null)
         var rowId = R.id.textViewBlank
         repeat(cursor.count + 1) {
@@ -128,6 +134,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun updateSelectedDate(year: Int = selectedDate.year, month: Int = selectedDate.monthValue, day: Int = selectedDate.dayOfMonth) {
+        Log.d("LENA", "updateSelectedDate")
         // update the member variable selectedDate appropriately and update days array for daySpinner if needed
         val oldSelectedDate = selectedDate
         val lengthOfPriorMonth = oldSelectedDate.lengthOfMonth()
@@ -159,6 +166,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun updateAssignments() {
+        Log.d("LENA", "updateAssignments")
         var rowIndex: Int = 0
         val monday = selectedDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val sunday = selectedDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
@@ -199,6 +207,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun emphasizeRow(rowIndex: Int) {
+        Log.d("LENA", "emphasizeRow")
         if (rowIndex < scheduleViews.size - 1) {
             val mainConstraintLayout: ConstraintLayout = findViewById(R.id.main_constraint_layout)
             with(ConstraintSet()) {
@@ -219,6 +228,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun reorderRowsBy(order: Int) {
+        Log.d("LENA", "reorderRowsBy")
         when(order) {
             LOONEY_ORDER -> {
                 val cursor = scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments ORDER BY assignment_id", null)
@@ -263,6 +273,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun updateRow(index: Int, anesthesiologist: String, assignment: Array<String>) {
+        Log.d("LENA", "updateRow")
         assert(index < scheduleViews.size)
         assert(assignment.size == scheduleViews[index].size - 1)
         scheduleViews[index][0]!!.text = anesthesiologist
@@ -272,6 +283,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun clearRowsStartingAt(startIndex: Int) {
+        Log.d("LENA", "clearRowsStartingAt")
         assert(startIndex <= scheduleViews.size)
         for (i in startIndex until scheduleViews.size)
             for (j in 1 until scheduleViews[i].size)
@@ -279,6 +291,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun newRow(rowAboveId: Int, anesthesiologist: String, assignment: Array<String>): Array<TextView?> {
+        Log.d("LENA", "newRow")
         var views = Array<TextView?>(assignment.size + 1) { null }
 
         val mainConstraintLayout: ConstraintLayout = findViewById(R.id.main_constraint_layout)
