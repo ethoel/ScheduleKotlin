@@ -2,14 +2,14 @@ package com.ethoel.schedule
 
 import android.app.ActionBar
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -35,11 +35,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         scheduleDatabase = ScheduleDatabaseHelper(this).readableDatabase
         setContentView(R.layout.activity_main)
+        supportActionBar!!.title = getString(R.string.app_name) + " v" + packageManager.getPackageInfo(packageName, 0).versionName
         initializeDateSpinners()
         initializeDateButtons()
         initializeScheduleViews()
         updateSelectedDate()
         updateAssignments()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.update_button -> Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.ethoel.schedule")).also { startActivity(it) }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     fun initializeDateSpinners() {
@@ -49,15 +62,15 @@ class MainActivity : AppCompatActivity() {
         daySpinner = findViewById(R.id.day_spinner)
 
         // initialize the views
-        yearSpinner.adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, arrayOf("2021", "2022")).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        yearSpinner.adapter = ArrayAdapter(this@MainActivity, R.layout.spinner_item, arrayOf("2021", "2022")).apply {
+            setDropDownViewResource(R.layout.spinner_dropdown_item)
         }
-        monthSpinner.adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, arrayOf("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        monthSpinner.adapter = ArrayAdapter(this@MainActivity, R.layout.spinner_item, arrayOf("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")).apply {
+            setDropDownViewResource(R.layout.spinner_dropdown_item)
         }
         val days = Array(selectedDate.lengthOfMonth()) { (it + 1).toString().padStart(2, '0') }
-        daySpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, days).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        daySpinner.adapter = ArrayAdapter(this, R.layout.spinner_item, days).apply {
+            setDropDownViewResource(R.layout.spinner_dropdown_item)
         }
 
         // set some of the initial values before setting listeners
@@ -126,8 +139,8 @@ class MainActivity : AppCompatActivity() {
         }
         if (lengthOfMonth != lengthOfPriorMonth) {
             val days = Array(lengthOfMonth) { (it + 1).toString().padStart(2, '0') }
-            daySpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, days).apply {
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            daySpinner.adapter = ArrayAdapter(this, R.layout.spinner_item, days).apply {
+                setDropDownViewResource(R.layout.spinner_dropdown_item)
             }
         }
         // update the spinners to reflect the new selectedDate if different
@@ -182,6 +195,27 @@ class MainActivity : AppCompatActivity() {
         clearRowsStartingAt(rowIndex)
 
         reorderRowsBy(LOONEY_ORDER)
+        emphasizeRow(0)
+    }
+
+    fun emphasizeRow(rowIndex: Int) {
+        if (rowIndex < scheduleViews.size - 1) {
+            val mainConstraintLayout: ConstraintLayout = findViewById(R.id.main_constraint_layout)
+            with(ConstraintSet()) {
+                clone(mainConstraintLayout)
+                connect(
+                    scheduleViews[rowIndex + 1][0]!!.id,
+                    ConstraintSet.TOP,
+                    scheduleViews[rowIndex][0]!!.id,
+                    ConstraintSet.BOTTOM,
+                    resources.getDimension(R.dimen.schedule_margin).toInt()
+                )
+                applyTo(mainConstraintLayout)
+            }
+        }
+        for(i in scheduleViews[rowIndex].indices) {
+            scheduleViews[rowIndex][i]!!.setTextColor(getColor(R.color.design_default_color_on_secondary))
+        }
     }
 
     fun reorderRowsBy(order: Int) {
@@ -201,8 +235,8 @@ class MainActivity : AppCompatActivity() {
                     if (looneyIndex!! != index)
                         for (i in scheduleViews[index].indices) {
                             var tmp = scheduleViews[index][i]!!.text
-                            scheduleViews[index][i]!!.text = scheduleViews[looneyIndex!!][i]!!.text
-                            scheduleViews[looneyIndex!!][i]!!.text = tmp
+                            scheduleViews[index][i]!!.text = scheduleViews[looneyIndex][i]!!.text
+                            scheduleViews[looneyIndex][i]!!.text = tmp
                         }
                     else
                         index++
@@ -252,7 +286,7 @@ class MainActivity : AppCompatActivity() {
         mainConstraintLayout.addView(TextView(this@MainActivity).also { it.text = anesthesiologist; it.id = prevId; views[0] = it })
         with(ConstraintSet()) {
             clone(mainConstraintLayout)
-            connect(prevId, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(prevId, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, resources.getDimension(R.dimen.schedule_margin).toInt())
             connect(prevId, ConstraintSet.TOP, rowAboveId, ConstraintSet.BOTTOM)
             constrainWidth(prevId, 0)
             setHorizontalWeight(prevId, 2.toFloat())
@@ -281,7 +315,7 @@ class MainActivity : AppCompatActivity() {
             connect(prevId, ConstraintSet.END, nextId, ConstraintSet.START)
             connect(nextId, ConstraintSet.START, prevId, ConstraintSet.END)
             connect(nextId, ConstraintSet.BOTTOM, prevId, ConstraintSet.BOTTOM)
-            connect(nextId, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+            connect(nextId, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, resources.getDimension(R.dimen.schedule_margin).toInt())
             setHorizontalWeight(nextId, 1.toFloat())
             constrainWidth(nextId, 0)
             applyTo(mainConstraintLayout)

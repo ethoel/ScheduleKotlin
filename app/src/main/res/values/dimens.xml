@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="schedule_margin">10dp</dimen>
+    <dimen name="inside_margin">5dp</dimen>
+    <dimen name="button_text_size">16sp</dimen>
+    <dimen name="corner_rounding">5dp</dimen>
+    <dimen name="arrow_size">10dp</dimen>
+    <dimen name="arrow_bottom">5dp</dimen>
+    <dimen name="arrow_top">10dp</dimen>
+    <dimen name="arrow_margin">16dp</dimen>
+    <dimen name="spinner_right_pad">46dp</dimen> <!-- ~ 2* left right padding + arrow width -->
+    <dimen name="left_right_pad">16dp</dimen>
+    <dimen name="top_bottom_pad">4dp</dimen>
+    <dimen name="spinner_elevation">4dp</dimen>
+    <dimen name="min_button_height">42dp</dimen>
+</resources>
