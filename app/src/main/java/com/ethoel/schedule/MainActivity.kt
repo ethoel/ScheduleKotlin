@@ -15,6 +15,7 @@ import android.view.*
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.widget.NestedScrollView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.color.DynamicColors
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity(), SelectedDateListener {
     fun initializeViewPager() {
         findViewById<ViewPager2>(R.id.schedule_view_pager).also {
             it.adapter = ScheduleAdapter(this)
+            it.setCurrentItem(1, false)
             it.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
@@ -61,8 +63,16 @@ class MainActivity : AppCompatActivity(), SelectedDateListener {
                 override fun onPageScrollStateChanged(state: Int) {
                     super.onPageScrollStateChanged(state)
                     if (state == ViewPager2.SCROLL_STATE_IDLE || state == ViewPager2.SCROLL_STATE_DRAGGING) {
-                        if (it.currentItem == 0) it.setCurrentItem(1, false)
-                        if (it.currentItem == 2) it.setCurrentItem(1, false)
+                        when (it.currentItem) {
+                            0 -> {
+                                (it.adapter as ScheduleAdapter).decrement()
+                                it.setCurrentItem(1, false)
+                            }
+                            2 -> {
+                                (it.adapter as ScheduleAdapter).increment()
+                                it.setCurrentItem(1, false)
+                            }
+                        }
                     }
                 }
             })
