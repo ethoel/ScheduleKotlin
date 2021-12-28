@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,45 +8,35 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Spinner
-        android:id="@+id/year_spinner"
-        style="@style/schedule_spinner_style"
-        android:layout_width="0dp"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/top_app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:menu="@menu/top_bar_menu" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <Button
+        android:id="@+id/date_picker_button"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/schedule_margin"
         android:layout_marginTop="@dimen/schedule_margin"
-        android:layout_marginEnd="@dimen/inside_margin"
-        android:contentDescription="@string/year"
-        app:layout_constraintEnd_toStartOf="@+id/month_spinner"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Spinner
-        style="@style/schedule_spinner_style"
-        android:id="@+id/month_spinner"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/inside_margin"
-        android:layout_marginEnd="@dimen/inside_margin"
-        android:contentDescription="@string/month"
-        app:layout_constraintEnd_toStartOf="@+id/day_spinner"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/year_spinner"
-        app:layout_constraintTop_toTopOf="@+id/year_spinner" />
-
-    <Spinner
-        style="@style/schedule_spinner_style"
-        android:id="@+id/day_spinner"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/inside_margin"
         android:layout_marginEnd="@dimen/schedule_margin"
-        android:contentDescription="@string/day"
+        app:icon="@drawable/ic_baseline_edit_calendar_24"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/month_spinner"
-        app:layout_constraintTop_toTopOf="@+id/month_spinner" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/app_bar_layout"
+        tools:text="Date" />
 
     <TextView
         android:id="@+id/textViewBlank"
@@ -56,14 +47,13 @@
         app:layout_constraintEnd_toStartOf="@+id/textViewMon"
         app:layout_constraintHorizontal_weight="2"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/year_spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/date_picker_button" />
 
     <TextView
         android:id="@+id/textViewMon"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/mon"
-        android:textColor="@android:color/primary_text_light"
         app:layout_constraintBottom_toBottomOf="@+id/textViewBlank"
         app:layout_constraintEnd_toStartOf="@+id/textViewTue"
         app:layout_constraintHorizontal_bias="0.5"
@@ -75,7 +65,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/tue"
-        android:textColor="@android:color/primary_text_light"
         app:layout_constraintBottom_toBottomOf="@+id/textViewMon"
         app:layout_constraintEnd_toStartOf="@+id/textViewWed"
         app:layout_constraintHorizontal_bias="0.5"
@@ -87,7 +76,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/wed"
-        android:textColor="@android:color/primary_text_light"
         app:layout_constraintBottom_toBottomOf="@+id/textViewTue"
         app:layout_constraintEnd_toStartOf="@+id/textViewThu"
         app:layout_constraintHorizontal_bias="0.5"
@@ -99,7 +87,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/thu"
-        android:textColor="@android:color/primary_text_light"
         app:layout_constraintBottom_toBottomOf="@+id/textViewWed"
         app:layout_constraintEnd_toStartOf="@+id/textViewFri"
         app:layout_constraintHorizontal_bias="0.5"
@@ -111,7 +98,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/fri"
-        android:textColor="@android:color/primary_text_light"
         app:layout_constraintBottom_toBottomOf="@+id/textViewThu"
         app:layout_constraintEnd_toStartOf="@+id/textViewSat"
         app:layout_constraintHorizontal_bias="0.5"
@@ -123,7 +109,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/sat"
-        android:textColor="@android:color/primary_text_light"
         app:layout_constraintBottom_toBottomOf="@+id/textViewFri"
         app:layout_constraintEnd_toStartOf="@+id/textViewSun"
         app:layout_constraintHorizontal_bias="0.5"
@@ -136,7 +121,6 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/schedule_margin"
         android:text="@string/sun"
-        android:textColor="@android:color/primary_text_light"
         app:layout_constraintBottom_toBottomOf="@+id/textViewSat"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -144,20 +128,20 @@
         app:layout_constraintStart_toEndOf="@+id/textViewSat" />
 
     <Button
-        style="@style/schedule_button_style"
         android:id="@+id/prev_button"
+        style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/schedule_margin"
         android:layout_marginEnd="@dimen/inside_margin"
+        android:layout_marginBottom="@dimen/schedule_margin"
         android:text="@string/previous"
-        app:layout_constraintBottom_toBottomOf="@+id/next_button"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/next_button"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        style="@style/schedule_button_style"
         android:id="@+id/next_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

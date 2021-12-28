@@ -3,9 +3,11 @@ package com.ethoel.schedule
 import android.app.ActionBar
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -13,118 +15,80 @@ import android.view.*
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.elevation.SurfaceColors
 import java.text.FieldPosition
-import java.time.DayOfWeek
-import java.time.LocalDate
+import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjuster
 import java.time.temporal.TemporalAdjusters
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SelectedDateListener {
 
-    var selectedDate: LocalDate = LocalDate.now()
+    var myDate: SelectedDate = SelectedDate().also { it.addListener(this) }
     var scheduleViews: ArrayList<Array<TextView?>> = ArrayList(0)
-    lateinit var yearSpinner: Spinner
-    lateinit var monthSpinner: Spinner
-    lateinit var daySpinner: Spinner
+    val datePicker = MaterialDatePicker.Builder.datePicker().setTitleText("Select date").setSelection(MaterialDatePicker.todayInUtcMilliseconds()).build()
     lateinit var scheduleDatabase: SQLiteDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("LENA", "onCreate")
         super.onCreate(savedInstanceState)
         scheduleDatabase = ScheduleDatabaseHelper(this).readableDatabase
         setContentView(R.layout.activity_main)
-        supportActionBar!!.title = getString(R.string.app_name) + " v" + packageManager.getPackageInfo(packageName, 0).versionName
-        initializeDateSpinners()
+        initializeTopAppBar()
+        initializeSystemNavigationBar()
+        initializeDatePicker()
         initializeDateButtons()
         initializeScheduleViews()
-        updateSelectedDate()
         updateAssignments()
+        Log.d("LENA", "Created")
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        Log.d("LENA", "onCreateOptionsMenu")
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return super.onCreateOptionsMenu(menu)
+    fun initializeDatePicker() {
+        datePicker.addOnPositiveButtonClickListener { selected ->
+            myDate.date = Instant.ofEpochMilli(selected).atOffset(ZoneOffset.UTC).toLocalDate()
+        }
+        val datePickerButton: Button = findViewById(R.id.date_picker_button)
+        datePickerButton.text = DateTimeFormatter.ofPattern("d MMMM u").format(myDate.date)
+        datePickerButton.setOnClickListener {
+            datePicker.show(supportFragmentManager, "Picker")
+        }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Log.d("LENA", "onOptionsItemsSelected")
-        when (item.itemId) {
-            R.id.update_button -> Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.ethoel.schedule")).also { startActivity(it) }
-        }
-        return super.onOptionsItemSelected(item)
+    fun initializeSystemNavigationBar() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
+            window.navigationBarColor = SurfaceColors.SURFACE_0.getColor(this@MainActivity)
     }
 
-    fun initializeDateSpinners() {
-        Log.d("LENA", "initializeDateSpinners")
-        // find the views
-        yearSpinner = findViewById(R.id.year_spinner)
-        monthSpinner = findViewById(R.id.month_spinner)
-        daySpinner = findViewById(R.id.day_spinner)
-
-        // initialize the views
-        yearSpinner.adapter = ArrayAdapter(this@MainActivity, R.layout.spinner_item, arrayOf("2021", "2022")).apply {
-            setDropDownViewResource(R.layout.spinner_dropdown_item)
-        }
-        monthSpinner.adapter = ArrayAdapter(this@MainActivity, R.layout.spinner_item, arrayOf("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")).apply {
-            setDropDownViewResource(R.layout.spinner_dropdown_item)
-        }
-        val days = Array(selectedDate.lengthOfMonth()) { (it + 1).toString().padStart(2, '0') }
-        daySpinner.adapter = ArrayAdapter(this, R.layout.spinner_item, days).apply {
-            setDropDownViewResource(R.layout.spinner_dropdown_item)
-        }
-
-        // set some of the initial values before setting listeners
-        yearSpinner.setSelection((yearSpinner.adapter as ArrayAdapter<String>).getPosition(selectedDate.year.toString()), false)
-        monthSpinner.setSelection((monthSpinner.adapter as ArrayAdapter<String>).getPosition(selectedDate.monthValue.toString().padStart(2,'0')), false)
-        daySpinner.setSelection((daySpinner.adapter as ArrayAdapter<String>).getPosition(selectedDate.dayOfMonth.toString().padStart(2, '0')), false)
-
-        // set the listeners
-        yearSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val newYear = (parent!!.getItemAtPosition(position) as String).toInt()
-                if (newYear != selectedDate.year) updateSelectedDate(year = newYear)
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
-        }
-        monthSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val newMonth = (parent!!.getItemAtPosition(position) as String).toInt()
-                if (newMonth != selectedDate.monthValue) updateSelectedDate(month = newMonth)
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
-        }
-        daySpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val newDay = (parent!!.getItemAtPosition(position) as String).toInt()
-                if (newDay != selectedDate.dayOfMonth) updateSelectedDate(day = newDay)
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {
+    fun initializeTopAppBar() {
+        val topAppBar: MaterialToolbar = findViewById(R.id.top_app_bar)
+        topAppBar.title = getString(R.string.app_name) + " " + packageManager.getPackageInfo(packageName, 0).versionName
+        topAppBar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.update_button -> {
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.ethoel.schedule")).also { startActivity(it) }
+                    true
+                }
+                else -> false
             }
         }
     }
 
     fun initializeDateButtons() {
-        Log.d("LENA", "initializeDateButtons")
         val nextButton: Button = findViewById(R.id.next_button)
         nextButton.setOnClickListener {
-            val next = selectedDate.plusWeeks(1)
-            updateSelectedDate(next.year, next.monthValue, next.dayOfMonth)
+            myDate.date = myDate.date.plusWeeks(1)
         }
         val prevButton: Button = findViewById(R.id.prev_button)
         prevButton.setOnClickListener {
-            val prev = selectedDate.minusWeeks(1)
-            updateSelectedDate(prev.year, prev.monthValue, prev.dayOfMonth)
+            myDate.date = myDate.date.minusWeeks(1)
         }
     }
 
     fun initializeScheduleViews() {
-        Log.d("LENA", "initializeScheduleViews")
         val cursor = scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments", null)
         var rowId = R.id.textViewBlank
         repeat(cursor.count + 1) {
@@ -133,43 +97,17 @@ class MainActivity : AppCompatActivity() {
         cursor.close()
     }
 
-    fun updateSelectedDate(year: Int = selectedDate.year, month: Int = selectedDate.monthValue, day: Int = selectedDate.dayOfMonth) {
-        Log.d("LENA", "updateSelectedDate")
-        // update the member variable selectedDate appropriately and update days array for daySpinner if needed
-        val oldSelectedDate = selectedDate
-        val lengthOfPriorMonth = oldSelectedDate.lengthOfMonth()
-        val lengthOfMonth = LocalDate.of(year, month, 1).lengthOfMonth()
-        selectedDate = if (day > lengthOfMonth) {
-            LocalDate.of(year, month, lengthOfMonth)
-        } else {
-            LocalDate.of(year, month, day)
-        }
-        if (lengthOfMonth != lengthOfPriorMonth) {
-            val days = Array(lengthOfMonth) { (it + 1).toString().padStart(2, '0') }
-            daySpinner.adapter = ArrayAdapter(this, R.layout.spinner_item, days).apply {
-                setDropDownViewResource(R.layout.spinner_dropdown_item)
-            }
-        }
-        // update the spinners to reflect the new selectedDate if different
-        if ((yearSpinner.selectedItem as String).toInt() != selectedDate.year)
-            yearSpinner.setSelection((yearSpinner.adapter as ArrayAdapter<String>).getPosition(selectedDate.year.toString()))
-        if ((monthSpinner.selectedItem as String).toInt() != selectedDate.monthValue)
-            monthSpinner.setSelection((monthSpinner.adapter as ArrayAdapter<String>).getPosition(selectedDate.monthValue.toString().padStart(2, '0')))
-        if ((daySpinner.selectedItem as String).toInt() != selectedDate.dayOfMonth)
-            daySpinner.setSelection((daySpinner.adapter as ArrayAdapter<String>).getPosition(selectedDate.dayOfMonth.toString().padStart(2, '0')))
-
-        // TODO: selectedDate needs to have listeners--that is how this really should be organized probably
-        // update assignments only if week of selected date has changed
-        if (selectedDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) != oldSelectedDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))) {
+    override fun selectedDateChanged(newDate: SelectedDate) {
+        findViewById<Button>(R.id.date_picker_button).text = DateTimeFormatter.ofPattern("d MMMM u").format(newDate.date)
+        if (myDate.date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) != myDate.priorDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))) {
             updateAssignments()
         }
     }
 
     fun updateAssignments() {
-        Log.d("LENA", "updateAssignments")
         var rowIndex: Int = 0
-        val monday = selectedDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-        val sunday = selectedDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+        val monday = myDate.date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val sunday = myDate.date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
         // update date row
         var monthText: String = DateTimeFormatter.ofPattern("MMM").format(monday)
@@ -207,7 +145,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun emphasizeRow(rowIndex: Int) {
-        Log.d("LENA", "emphasizeRow")
         if (rowIndex < scheduleViews.size - 1) {
             val mainConstraintLayout: ConstraintLayout = findViewById(R.id.main_constraint_layout)
             with(ConstraintSet()) {
@@ -223,12 +160,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
         for(i in scheduleViews[rowIndex].indices) {
-            scheduleViews[rowIndex][i]!!.setTextColor(getColor(R.color.design_default_color_on_secondary))
+            scheduleViews[rowIndex][i]!!.setTextAppearance(android.R.style.TextAppearance_Material_Body2)
         }
     }
 
     fun reorderRowsBy(order: Int) {
-        Log.d("LENA", "reorderRowsBy")
         when(order) {
             LOONEY_ORDER -> {
                 val cursor = scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments ORDER BY assignment_id", null)
@@ -273,7 +209,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun updateRow(index: Int, anesthesiologist: String, assignment: Array<String>) {
-        Log.d("LENA", "updateRow")
         assert(index < scheduleViews.size)
         assert(assignment.size == scheduleViews[index].size - 1)
         scheduleViews[index][0]!!.text = anesthesiologist
@@ -283,7 +218,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun clearRowsStartingAt(startIndex: Int) {
-        Log.d("LENA", "clearRowsStartingAt")
         assert(startIndex <= scheduleViews.size)
         for (i in startIndex until scheduleViews.size)
             for (j in 1 until scheduleViews[i].size)
@@ -291,7 +225,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun newRow(rowAboveId: Int, anesthesiologist: String, assignment: Array<String>): Array<TextView?> {
-        Log.d("LENA", "newRow")
         var views = Array<TextView?>(assignment.size + 1) { null }
 
         val mainConstraintLayout: ConstraintLayout = findViewById(R.id.main_constraint_layout)
@@ -341,4 +274,5 @@ class MainActivity : AppCompatActivity() {
         const val ALPHA_LOCUM_LAST = 1
         const val ALPHA_WITH_LOCUM = 2
     }
+
 }

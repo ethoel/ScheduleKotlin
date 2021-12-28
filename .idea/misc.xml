@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.225" />
+        <entry key="app/src/main/res/drawable/ic_baseline_edit_calendar_24.xml" value="0.225" />
+        <entry key="app/src/main/res/drawable/ic_baseline_update_24.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/schedule_spinner.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/spinner_background.xml" value="0.225" />
@@ -15,6 +17,7 @@
         <entry key="app/src/main/res/layout/spinner_dropdown_item.xml" value="0.20885416666666667" />
         <entry key="app/src/main/res/layout/spinner_item.xml" value="0.20885416666666667" />
         <entry key="app/src/main/res/menu/main_menu.xml" value="0.371875" />
+        <entry key="app/src/main/res/menu/top_bar_menu.xml" value="0.20572916666666666" />
       </map>
     </option>
   </component>
