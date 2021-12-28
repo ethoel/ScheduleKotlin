@@ -24,6 +24,13 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/schedule_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        app:layout_constraintBottom_toTopOf="@id/date_picker_button"
+        app:layout_constraintTop_toBottomOf="@id/app_bar_layout" />
+
     <Button
         android:id="@+id/date_picker_button"
         style="@style/Widget.Material3.Button.OutlinedButton"
@@ -35,7 +42,7 @@
         app:icon="@drawable/ic_baseline_edit_calendar_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/app_bar_layout"
+        app:layout_constraintTop_toBottomOf="@id/schedule_view_pager"
         tools:text="Date" />
 
     <TextView
