@@ -1,16 +1,16 @@
 package com.ethoel.schedule
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
-class ScheduleFragment(var counter: Int) : Fragment() {
-    private var textView: TextView? = null
+class SchedulePageFragment(var counter: Int) : Fragment() {
+    private var assignmentAdapter: AssignmentAdapter? = null
     val data1: String =
         """If you really want to hear about it, the first thing you’ll probably want to know is"""
     val data2: String =
@@ -33,17 +33,15 @@ class ScheduleFragment(var counter: Int) : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
-        val scheduleView : NestedScrollView = inflater.inflate(R.layout.schedule_view, container, false) as NestedScrollView
-        with(scheduleView.getChildAt(0) as TextView) {
-            text = tempData(counter)
-            textView = this
-        }
-        return scheduleView
+        val schedulePageView: RecyclerView = inflater.inflate(R.layout.schedule_page, container, false) as RecyclerView
+        schedulePageView.layoutManager = LinearLayoutManager(this.context)
+        schedulePageView.adapter = AssignmentAdapter(arrayOf("Test1", "Test2", "Test3"))
+        assignmentAdapter = schedulePageView.adapter as AssignmentAdapter
+        return schedulePageView
     }
 
     fun updateView(counter: Int) {
         this.counter = counter
-        textView?.text = tempData(counter)
     }
 
     private fun tempData(number: Int): String {
