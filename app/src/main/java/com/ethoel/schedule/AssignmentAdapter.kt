@@ -12,17 +12,29 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+import java.util.*
+import kotlin.collections.ArrayList
 
 class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() {
     var activity: MainActivity? = null
-    private var assignments: ArrayList<Array<String>> = arrayListOf(
-        arrayOf( "", "M", "T", "W", "T", "F", "S", "S" ),
-        arrayOf( "Date", "1", "2", "3", "4", "5", "6", "7" ))
+    private var assignments: ArrayList<Array<String>> = arrayListOf(arrayOf("", "M", "T", "W", "T", "F", "S", "S"), Array<String>(8) { "" })
 
     class ViewHolder(val view: View): RecyclerView.ViewHolder(view) {}
 
+    override fun getItemViewType(position: Int): Int {
+        return when (position) {
+            0 -> DAY_ROW
+            1 -> DATE_ROW
+            else -> ASSIGNMENT_ROW
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AssignmentAdapter.ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.assignment_row, parent, false))
+        return when (viewType) {
+            DAY_ROW -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.day_row, parent, false))
+            DATE_ROW -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.date_row, parent, false))
+            else -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.assignment_row, parent, false))
+        }
     }
 
     override fun onBindViewHolder(holder: AssignmentAdapter.ViewHolder, position: Int) {
@@ -41,16 +53,18 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
         val monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val sunday = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
+        assignments = assignments.take(2) as ArrayList<Array<String>>
+
+        // update date row
         var monthText: String = DateTimeFormatter.ofPattern("MMM").format(monday)
         if (monday.month != sunday.month)
             monthText += "-${DateTimeFormatter.ofPattern("MMM").format(sunday)}"
 
-        assignments[DATE_ROW][0] = monthText
-        for (i in 1 until assignments[DATE_ROW].size) {
-            assignments[DATE_ROW][i] = monday.plusDays((i - 1).toLong()).dayOfMonth.toString()
-        }
+        assignments[1][0] = monthText
+        for (i in 1 until assignments[1].size)
+            assignments[1][i] = monday.plusDays((i - 1).toLong()).dayOfMonth.toString()
 
-        // update the rest from database
+        // update assignments
         var assignmentRows: ArrayList<Array<String>> = ArrayList(0)
         val cursor = activity!!.scheduleDatabase.rawQuery(
             "SELECT date, anesthesiologist, assignment FROM assignments WHERE date BETWEEN ? AND ? ORDER BY anesthesiologist,date",
@@ -71,17 +85,14 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
         } while (!cursor.isAfterLast)
         cursor.close()
 
-        for (i in assignmentRows.indices) {
-            if (i + DATE_ROW + 1 < assignments.size)
-                assignments[i + DATE_ROW + 1] = assignmentRows[i]
-            else
-                assignments.add(assignmentRows[i])
-        }
+        assignments.addAll(assignmentRows)
 
-        notifyItemRangeChanged(DATE_ROW, assignments.size - DATE_ROW)
+        notifyItemRangeChanged(0, assignments.size)
     }
 
     companion object {
+        const val DAY_ROW = 0
         const val DATE_ROW = 1
+        const val ASSIGNMENT_ROW = 2
     }
 }

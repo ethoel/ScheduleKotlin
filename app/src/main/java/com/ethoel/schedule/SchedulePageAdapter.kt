@@ -3,15 +3,24 @@ package com.ethoel.schedule
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import java.time.LocalDate
 
-class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): FragmentStateAdapter(activity), SelectedDateListener {
+class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): FragmentStateAdapter(activity), SelectedDateListener  {
+    private var previousPage = SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date.minusWeeks(1))  }
+    private var nextPage = SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date.plusWeeks(1))  }
     private var schedulePageFragments: Array<SchedulePageFragment> =
     arrayOf(
-        SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date.minusWeeks(1))  },
-        SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date) },
-        SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date.plusWeeks(1)) })
+        previousPage,
+        SchedulePageFragment(object: RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                position = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            }
+        }).apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date) },
+        nextPage)
 
     override fun getItemCount(): Int {
         return schedulePageFragments.size
@@ -25,6 +34,8 @@ class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): Fragmen
         const val PREVIOUS_PAGE: Int = 0
         const val CURRENT_PAGE: Int = 1
         const val NEXT_PAGE: Int = 2
+        var position = 0
+        var offset = 0
     }
 
     override fun selectedDateChanged(selectedDate: LocalDate) {
