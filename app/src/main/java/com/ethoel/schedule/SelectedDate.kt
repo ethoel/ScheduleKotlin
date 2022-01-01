@@ -18,7 +18,7 @@ class SelectedDate {
 
     private fun invokeSelectedDateChanged() {
         listeners.forEach { listener ->
-            listener.selectedDateChanged(this)
+            listener.selectedDateChanged(date)
         }
     }
 
@@ -29,21 +29,9 @@ class SelectedDate {
     fun removeListener(listener: SelectedDateListener) {
         listeners.remove(listener)
     }
-
-    fun yearChanged(): Boolean {
-       return date.year != priorDate.year
-    }
-
-    fun monthChanged(): Boolean {
-        return date.monthValue != priorDate.monthValue
-    }
-
-    fun dayChanged(): Boolean {
-        return date.dayOfMonth != priorDate.dayOfMonth
-    }
 }
 
 interface SelectedDateListener {
-    fun selectedDateChanged(selectedDate: SelectedDate)
+    fun selectedDateChanged(selectedDate: LocalDate)
 }
 

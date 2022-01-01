@@ -4,10 +4,14 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import java.time.LocalDate
 
-class SchedulePageAdapter(activity: AppCompatActivity): FragmentStateAdapter(activity) {
-    private var counter: Int = 0
-    private var schedulePageFragments: Array<SchedulePageFragment> = arrayOf(SchedulePageFragment(-1), SchedulePageFragment(0), SchedulePageFragment(1))
+class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): FragmentStateAdapter(activity), SelectedDateListener {
+    private var schedulePageFragments: Array<SchedulePageFragment> =
+    arrayOf(
+        SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date.minusWeeks(1))  },
+        SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date) },
+        SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date.plusWeeks(1)) })
 
     override fun getItemCount(): Int {
         return schedulePageFragments.size
@@ -17,19 +21,15 @@ class SchedulePageAdapter(activity: AppCompatActivity): FragmentStateAdapter(act
         return schedulePageFragments[position]
     }
 
-    fun decrement() {
-        counter--
-        schedulePageFragments[0].updateView(counter - 1)
-        schedulePageFragments[1].updateView(counter)
-        schedulePageFragments[2].updateView(counter + 1)
-        Log.d("LENA", "Decrementing $counter")
+    companion object {
+        const val PREVIOUS_PAGE: Int = 0
+        const val CURRENT_PAGE: Int = 1
+        const val NEXT_PAGE: Int = 2
     }
 
-    fun increment() {
-        counter++
-        schedulePageFragments[0].updateView(counter - 1)
-        schedulePageFragments[1].updateView(counter)
-        schedulePageFragments[2].updateView(counter + 1)
-        Log.d("LENA", "Incrementing $counter")
+    override fun selectedDateChanged(selectedDate: LocalDate) {
+        schedulePageFragments[PREVIOUS_PAGE].assignmentAdapter.setDate(selectedDate.minusWeeks(1))
+        schedulePageFragments[CURRENT_PAGE].assignmentAdapter.setDate(selectedDate)
+        schedulePageFragments[NEXT_PAGE].assignmentAdapter.setDate(selectedDate.plusWeeks(1))
     }
 }

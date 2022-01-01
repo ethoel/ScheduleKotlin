@@ -39,30 +39,24 @@ class MainActivity : AppCompatActivity(), SelectedDateListener {
         initializeDateButtons()
         initializeScheduleViews()
         updateAssignments()
-        Log.d("LENA", "Created")
     }
 
     fun initializeViewPager() {
-        findViewById<ViewPager2>(R.id.schedule_view_pager).also {
-            it.adapter = SchedulePageAdapter(this)
-            it.setCurrentItem(1, false)
-            it.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    super.onPageSelected(position)
-                    Log.d("LENA", "Position " + position)
-                }
-
+        findViewById<ViewPager2>(R.id.schedule_view_pager).also { pager ->
+            pager.adapter = SchedulePageAdapter(this, myDate.date).also { myDate.addListener(it) }
+            pager.setCurrentItem(1, false)
+            pager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
                 override fun onPageScrollStateChanged(state: Int) {
                     super.onPageScrollStateChanged(state)
-                    if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
-                        when (it.currentItem) {
-                            0 -> {
-                                (it.adapter as SchedulePageAdapter).decrement()
-                                it.setCurrentItem(1, false)
+                    if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                        when (pager.currentItem) {
+                            SchedulePageAdapter.PREVIOUS_PAGE -> {
+                                myDate.date = myDate.date.minusWeeks(1)
+                                pager.setCurrentItem(SchedulePageAdapter.CURRENT_PAGE, false)
                             }
-                            2 -> {
-                                (it.adapter as SchedulePageAdapter).increment()
-                                it.setCurrentItem(1, false)
+                            SchedulePageAdapter.NEXT_PAGE -> {
+                                myDate.date = myDate.date.plusWeeks(1)
+                                pager.setCurrentItem(SchedulePageAdapter.CURRENT_PAGE, false)
                             }
                         }
                     }
@@ -121,8 +115,8 @@ class MainActivity : AppCompatActivity(), SelectedDateListener {
         cursor.close()
     }
 
-    override fun selectedDateChanged(newDate: SelectedDate) {
-        findViewById<Button>(R.id.date_picker_button).text = DateTimeFormatter.ofPattern("EEEE, d MMMM u").format(newDate.date)
+    override fun selectedDateChanged(newDate: LocalDate) {
+        findViewById<Button>(R.id.date_picker_button).text = DateTimeFormatter.ofPattern("EEEE, d MMMM u").format(newDate)
         if (myDate.date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) != myDate.priorDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))) {
             updateAssignments()
         }
