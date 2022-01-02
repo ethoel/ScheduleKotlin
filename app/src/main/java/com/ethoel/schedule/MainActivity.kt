@@ -25,10 +25,9 @@ import kotlin.collections.ArrayList
 class MainActivity : AppCompatActivity(), SelectedDateListener {
 
     var myDate: SelectedDate = SelectedDate().also { it.addListener(this) }
-    val datePicker = MaterialDatePicker.Builder.datePicker().setTitleText("Select date").setSelection(MaterialDatePicker.todayInUtcMilliseconds()).build()
     lateinit var scheduleDatabase: SQLiteDatabase
-    lateinit var dateRow: LinearLayout
     lateinit var datePickerButton: Button
+    lateinit var viewPager: ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,10 +38,12 @@ class MainActivity : AppCompatActivity(), SelectedDateListener {
         initializeSystemNavigationBar()
         initializeDatePicker()
         initializeDateButtons()
+
+        myDate.date = LocalDate.now()
     }
 
     fun initializeViewPager() {
-        findViewById<ViewPager2>(R.id.schedule_view_pager).also { pager ->
+        viewPager = findViewById<ViewPager2>(R.id.schedule_view_pager).also { pager ->
             pager.adapter = SchedulePageAdapter(this, myDate.date).also { myDate.addListener(it) }
             pager.setCurrentItem(1, false)
             pager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
@@ -66,12 +67,15 @@ class MainActivity : AppCompatActivity(), SelectedDateListener {
     }
 
     fun initializeDatePicker() {
-        datePicker.addOnPositiveButtonClickListener { selected ->
-            myDate.date = Instant.ofEpochMilli(selected).atOffset(ZoneOffset.UTC).toLocalDate()
-        }
         datePickerButton = findViewById(R.id.date_picker_button)
         datePickerButton.setOnClickListener {
-            datePicker.show(supportFragmentManager, "Picker")
+            //TODO is this really the best way about it
+            MaterialDatePicker.Builder.datePicker().setSelection(myDate.date.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()).build().apply {
+                addOnPositiveButtonClickListener { selected ->
+                    myDate.date = Instant.ofEpochMilli(selected).atOffset(ZoneOffset.UTC).toLocalDate()
+                }
+                show(supportFragmentManager, "Picker")
+            }
         }
         updateDatePickerButton()
     }
@@ -114,74 +118,5 @@ class MainActivity : AppCompatActivity(), SelectedDateListener {
         updateDatePickerButton()
     }
 
-    //fun emphasizeRow(rowIndex: Int) {
-    //    if (rowIndex < scheduleViews.size - 1) {
-    //        val mainConstraintLayout: ConstraintLayout = findViewById(R.id.main_constraint_layout)
-    //        with(ConstraintSet()) {
-    //            clone(mainConstraintLayout)
-    //            connect(
-    //                scheduleViews[rowIndex + 1][0]!!.id,
-    //                ConstraintSet.TOP,
-    //                scheduleViews[rowIndex][0]!!.id,
-    //                ConstraintSet.BOTTOM,
-    //                resources.getDimension(R.dimen.schedule_margin).toInt()
-    //            )
-    //            applyTo(mainConstraintLayout)
-    //        }
-    //    }
-    //    for(i in scheduleViews[rowIndex].indices) {
-    //        scheduleViews[rowIndex][i]!!.setTextAppearance(android.R.style.TextAppearance_Material_Body2)
-    //    }
-    //}
-
-    //fun reorderRowsBy(order: Int) {
-    //    when(order) {
-    //        LOONEY_ORDER -> {
-    //            val cursor = scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments ORDER BY assignment_id", null)
-    //            var looneyOrder = HashMap<String, Int>(cursor.count)
-    //            cursor.moveToFirst()
-    //            do {
-    //                looneyOrder[cursor.getString(0)] = cursor.position + 1
-    //            } while (cursor.moveToNext())
-    //            cursor.close()
-
-    //            var index = 1
-    //            while (index < scheduleViews.size) {
-    //                var looneyIndex = looneyOrder[scheduleViews[index][0]!!.text]
-    //                if (looneyIndex!! != index)
-    //                    for (i in scheduleViews[index].indices) {
-    //                        var tmp = scheduleViews[index][i]!!.text
-    //                        scheduleViews[index][i]!!.text = scheduleViews[looneyIndex][i]!!.text
-    //                        scheduleViews[looneyIndex][i]!!.text = tmp
-    //                    }
-    //                else
-    //                    index++
-    //            }
-    //        }
-    //        ALPHA_LOCUM_LAST -> {
-    //            var startCopying = false
-    //            lateinit var previousTextView: Array<TextView?>
-    //            scheduleViews.forEach { textView ->
-    //                if (startCopying) {
-    //                    for (i in textView.indices) {
-    //                        var tmp = previousTextView[i]!!.text
-    //                        previousTextView[i]!!.text = textView[i]!!.text
-    //                        textView[i]!!.text = tmp
-    //                    }
-    //                }
-    //                if (textView[0]!!.text.trim() == "Locum") {
-    //                    startCopying = true
-    //                }
-    //                previousTextView = textView
-    //            }
-    //        }
-    //    }
-    //}
-
-    companion object {
-        const val LOONEY_ORDER = 0
-        const val ALPHA_LOCUM_LAST = 1
-        const val ALPHA_WITH_LOCUM = 2
-    }
 
 }

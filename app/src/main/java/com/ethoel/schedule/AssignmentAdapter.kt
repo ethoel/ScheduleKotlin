@@ -1,6 +1,5 @@
 package com.ethoel.schedule
 
-import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -53,19 +52,19 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
         val monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val sunday = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
-        assignments = assignments.take(2) as ArrayList<Array<String>>
+        var headerRows = assignments.take(2) as ArrayList<Array<String>>
 
         // update date row
         var monthText: String = DateTimeFormatter.ofPattern("MMM").format(monday)
         if (monday.month != sunday.month)
             monthText += "-${DateTimeFormatter.ofPattern("MMM").format(sunday)}"
 
-        assignments[1][0] = monthText
-        for (i in 1 until assignments[1].size)
-            assignments[1][i] = monday.plusDays((i - 1).toLong()).dayOfMonth.toString()
+        headerRows[1][0] = monthText
+        for (i in 1 until headerRows[1].size)
+            headerRows[1][i] = monday.plusDays((i - 1).toLong()).dayOfMonth.toString()
 
         // update assignments
-        var assignmentRows: ArrayList<Array<String>> = ArrayList(0)
+        var assignmentRows: ArrayList<Array<String>> = ArrayList(assignments.size - 2)
         val cursor = activity!!.scheduleDatabase.rawQuery(
             "SELECT date, anesthesiologist, assignment FROM assignments WHERE date BETWEEN ? AND ? ORDER BY anesthesiologist,date",
             arrayOf(monday.toString(), sunday.toString())
@@ -85,14 +84,73 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
         } while (!cursor.isAfterLast)
         cursor.close()
 
-        assignments.addAll(assignmentRows)
+        if (assignmentRows.size == 0 && assignments.size > 2) {
+            assignmentRows = assignments.drop(2) as ArrayList<Array<String>>
+            for (i in assignmentRows.indices)
+                for (j in 1 until assignmentRows[i].size)
+                    assignmentRows[i][j] = "-"
+        }
 
-        notifyItemRangeChanged(0, assignments.size)
+        reorderRowsBy(LOONEY_ORDER, assignmentRows)
+
+        headerRows.addAll(assignmentRows)
+        assignments = headerRows
+
+        notifyDataSetChanged()
+    }
+
+    private fun reorderRowsBy(order: Int, assignmentRows: ArrayList<Array<String>>) {
+        when(order) {
+            LOONEY_ORDER -> {
+                val cursor = activity!!.scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments ORDER BY assignment_id", null)
+                var looneyOrder = HashMap<String, Int>(cursor.count)
+                cursor.moveToFirst()
+                do {
+                    looneyOrder[cursor.getString(0)] = cursor.position
+                } while (cursor.moveToNext())
+                cursor.close()
+
+                var index = 0
+                while (index < assignmentRows.size) {
+                    var looneyIndex = looneyOrder[assignmentRows[index][0]]
+                    assert(looneyIndex!! < assignmentRows.size)
+                    if (looneyIndex != index)
+                        for (i in assignmentRows[index].indices) {
+                            var tmp = assignmentRows[index][i]
+                            assignmentRows[index][i] = assignmentRows[looneyIndex!!][i]
+                            assignmentRows[looneyIndex!!][i] = tmp
+                        }
+                    else
+                        index++
+                }
+            }
+            ALPHA_LOCUM_LAST -> {
+                var startCopying = false
+                lateinit var previousRow: Array<String>
+                assignmentRows.forEach { row ->
+                    if (startCopying) {
+                        for (i in row.indices) {
+                            var tmp = previousRow[i]
+                            previousRow[i] = row[i]
+                            row[i] = tmp
+                        }
+                    }
+                    if (row[0].trim() == "Locum") {
+                        startCopying = true
+                    }
+                    previousRow = row
+                }
+            }
+        }
     }
 
     companion object {
         const val DAY_ROW = 0
         const val DATE_ROW = 1
         const val ASSIGNMENT_ROW = 2
+
+        const val LOONEY_ORDER = 0
+        const val ALPHA_LOCUM_LAST = 1
+        const val ALPHA_WITH_LOCUM = 2
     }
 }

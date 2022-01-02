@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import java.time.LocalDate
 
 class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): FragmentStateAdapter(activity), SelectedDateListener  {
@@ -17,7 +18,7 @@ class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): Fragmen
         SchedulePageFragment(object: RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                position = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                //position = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             }
         }).apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date) },
         nextPage)

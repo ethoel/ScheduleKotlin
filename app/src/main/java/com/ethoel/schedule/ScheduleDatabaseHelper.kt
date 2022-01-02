@@ -67,6 +67,6 @@ class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, D
     companion object {
         const val ASSETS_PATH = "databases"
         const val DATABASE_NAME = "schedule"
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 5
     }
 }
