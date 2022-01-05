@@ -9,8 +9,8 @@ class SelectedDate {
             if (value != date) {
                 priorDate = date
                 field = value
-                invokeSelectedDateChanged()
             }
+            invokeSelectedDateChanged()
         }
     var priorDate: LocalDate = date
         private set

@@ -4,9 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
+import android.widget.Toast
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.Exception
 import java.lang.RuntimeException
+import java.net.URL
 
 class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -27,7 +31,7 @@ class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, D
     private fun installOrUpdateIfNecessary() {
         if(installedDatabaseIsOutdated()) {
             context.deleteDatabase(DATABASE_NAME)
-            installDatabaseFromAssets()
+            if (!installDatabaseFromHttp()) installDatabaseFromAssets()
             writeDatabaseVersionInPreferences()
         }
     }
@@ -44,6 +48,25 @@ class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, D
             outputStream.close()
         } catch (exception: Throwable) {
             throw RuntimeException("The $DATABASE_NAME database could not be installed.", exception)
+        }
+    }
+
+    private fun installDatabaseFromHttp(): Boolean {
+        try {
+            val inputStream =
+                URL("https://pacificanesthesia.s3.us-west-2.amazonaws.com/schedule.db").openStream()
+            val outputFile = File(context.getDatabasePath(ScheduleDatabaseHelper.DATABASE_NAME).path)
+            val outputStream = FileOutputStream(outputFile)
+            Log.d("LENA", "copying file")
+            inputStream.copyTo(outputStream)
+            inputStream.close()
+            outputStream.flush()
+            outputStream.close()
+            Toast.makeText(context, "Schedule updated", Toast.LENGTH_SHORT).show()
+            return true
+        } catch (exception: Exception) {
+            Toast.makeText(context, "Schedule update failed", Toast.LENGTH_SHORT).show()
+            return false
         }
     }
 
