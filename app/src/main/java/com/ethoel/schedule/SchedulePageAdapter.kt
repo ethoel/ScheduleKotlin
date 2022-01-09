@@ -10,8 +10,8 @@ import androidx.viewpager2.widget.ViewPager2
 import java.time.LocalDate
 
 class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): FragmentStateAdapter(activity), SelectedDateListener  {
-    private var previousPage = SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date.minusWeeks(1))  }
-    private var nextPage = SchedulePageFragment().apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date.plusWeeks(1))  }
+    private var previousPage = SchedulePageFragment().apply { assignmentAdapter.scheduleDatabaseHelper = (activity as MainActivity).scheduleDatabaseHelper; assignmentAdapter.setDate(date.minusWeeks(1))  }
+    private var nextPage = SchedulePageFragment().apply { assignmentAdapter.scheduleDatabaseHelper = (activity as MainActivity).scheduleDatabaseHelper; assignmentAdapter.setDate(date.plusWeeks(1))  }
     private var schedulePageFragments: Array<SchedulePageFragment> =
     arrayOf(
         previousPage,
@@ -20,7 +20,7 @@ class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): Fragmen
                 super.onScrollStateChanged(recyclerView, newState)
                 //position = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             }
-        }).apply { assignmentAdapter.activity = activity as MainActivity; assignmentAdapter.setDate(date) },
+        }).apply { assignmentAdapter.scheduleDatabaseHelper = (activity as MainActivity).scheduleDatabaseHelper; assignmentAdapter.setDate(date) },
         nextPage)
 
     override fun getItemCount(): Int {

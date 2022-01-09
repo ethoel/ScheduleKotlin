@@ -15,7 +15,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() {
-    var activity: MainActivity? = null
+    var scheduleDatabaseHelper: ScheduleDatabaseHelper? = null
     private var assignments: ArrayList<Array<String>> = arrayListOf(arrayOf("", "M", "T", "W", "T", "F", "S", "S"), Array<String>(8) { "" })
 
     class ViewHolder(val view: View): RecyclerView.ViewHolder(view) {}
@@ -65,24 +65,29 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
 
         // update assignments
         var assignmentRows: ArrayList<Array<String>> = ArrayList(assignments.size - 2)
-        val cursor = activity!!.scheduleDatabase.rawQuery(
-            "SELECT date, anesthesiologist, assignment FROM assignments WHERE date BETWEEN ? AND ? ORDER BY anesthesiologist,date",
-            arrayOf(monday.toString(), sunday.toString())
-        )
-        if (cursor.moveToFirst()) do {
-            val anesthesiologist = cursor.getString(1)
-            var assignmentRow = Array<String>(8) { if (it == 0) anesthesiologist else "-" }
-            for (i in 1 until assignmentRow.size) {
-                val date = cursor.getString(0)
-                if (monday.plusDays((i - 1).toLong()).toString() == date) {
-                    assignmentRow[i] = cursor.getString(2).trim().let { if (it == "") "-" else it}
-                } else
-                    continue // find the first date with data
-                if (!cursor.moveToNext() || cursor.getString(1) != anesthesiologist) break
-            }
-            assignmentRows.add(assignmentRow)
-        } while (!cursor.isAfterLast)
-        cursor.close()
+        Log.d("LENA", "about to shit from the database")
+        if (scheduleDatabaseHelper != null) {
+            val cursor = scheduleDatabaseHelper!!.scheduleDatabase!!.rawQuery(
+                "SELECT date, anesthesiologist, assignment FROM assignments WHERE date BETWEEN ? AND ? ORDER BY anesthesiologist,date",
+                arrayOf(monday.toString(), sunday.toString())
+            )
+            if (cursor.moveToFirst()) do {
+                val anesthesiologist = cursor.getString(1)
+                var assignmentRow = Array<String>(8) { if (it == 0) anesthesiologist else "-" }
+                for (i in 1 until assignmentRow.size) {
+                    val date = cursor.getString(0)
+                    if (monday.plusDays((i - 1).toLong()).toString() == date) {
+                        assignmentRow[i] =
+                            cursor.getString(2).trim().let { if (it == "") "-" else it }
+                    } else
+                        continue // find the first date with data
+                    if (!cursor.moveToNext() || cursor.getString(1) != anesthesiologist) break
+                }
+                assignmentRows.add(assignmentRow)
+            } while (!cursor.isAfterLast)
+            cursor.close()
+        }
+        Log.d("LENA", "got shit from the database ${assignmentRows.size}")
 
         if (assignmentRows.size == 0 && assignments.size > 2) {
             assignmentRows = assignments.drop(2) as ArrayList<Array<String>>
@@ -100,28 +105,34 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
     }
 
     private fun reorderRowsBy(order: Int, assignmentRows: ArrayList<Array<String>>) {
+        if (assignmentRows.size < 2) return
         when(order) {
             LOONEY_ORDER -> {
-                val cursor = activity!!.scheduleDatabase.rawQuery("SELECT DISTINCT anesthesiologist FROM assignments ORDER BY assignment_id", null)
-                var looneyOrder = HashMap<String, Int>(cursor.count)
-                cursor.moveToFirst()
-                do {
-                    looneyOrder[cursor.getString(0)] = cursor.position
-                } while (cursor.moveToNext())
-                cursor.close()
+                if (scheduleDatabaseHelper != null) {
+                    val cursor = scheduleDatabaseHelper!!.scheduleDatabase!!.rawQuery(
+                        "SELECT DISTINCT anesthesiologist FROM assignments ORDER BY assignment_id",
+                        null
+                    )
+                    var looneyOrder = HashMap<String, Int>(cursor.count)
+                    cursor.moveToFirst()
+                    do {
+                        looneyOrder[cursor.getString(0)] = cursor.position
+                    } while (cursor.moveToNext())
+                    cursor.close()
 
-                var index = 0
-                while (index < assignmentRows.size) {
-                    var looneyIndex = looneyOrder[assignmentRows[index][0]]
-                    assert(looneyIndex!! < assignmentRows.size)
-                    if (looneyIndex != index)
-                        for (i in assignmentRows[index].indices) {
-                            var tmp = assignmentRows[index][i]
-                            assignmentRows[index][i] = assignmentRows[looneyIndex!!][i]
-                            assignmentRows[looneyIndex!!][i] = tmp
-                        }
-                    else
-                        index++
+                    var index = 0
+                    while (index < assignmentRows.size) {
+                        var looneyIndex = looneyOrder[assignmentRows[index][0]]
+                        assert(looneyIndex!! < assignmentRows.size)
+                        if (looneyIndex != index)
+                            for (i in assignmentRows[index].indices) {
+                                var tmp = assignmentRows[index][i]
+                                assignmentRows[index][i] = assignmentRows[looneyIndex!!][i]
+                                assignmentRows[looneyIndex!!][i] = tmp
+                            }
+                        else
+                            index++
+                    }
                 }
             }
             ALPHA_LOCUM_LAST -> {

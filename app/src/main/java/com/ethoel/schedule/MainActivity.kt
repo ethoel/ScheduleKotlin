@@ -16,10 +16,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.elevation.SurfaceColors
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStreamReader
+import java.io.*
 import java.lang.Exception
 import java.lang.RuntimeException
 import java.net.HttpURLConnection
@@ -32,17 +29,20 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
 
-class MainActivity : AppCompatActivity(), SelectedDateListener {
+class MainActivity : AppCompatActivity(), SelectedDateListener, ScheduleDatabaseListener {
 
     var myDate: SelectedDate = SelectedDate().also { it.addListener(this) }
-    lateinit var scheduleDatabase: SQLiteDatabase
+    lateinit var scheduleDatabaseHelper: ScheduleDatabaseHelper
     lateinit var datePickerButton: Button
     lateinit var viewPager: ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        scheduleDatabase = ScheduleDatabaseHelper(this).readableDatabase
         setContentView(R.layout.activity_main)
+        scheduleDatabaseHelper = ScheduleDatabaseHelper(this).also {
+            it.addListener(this)
+            it.updateDatabase()
+        }
         initializeViewPager()
         initializeTopAppBar()
         initializeSystemNavigationBar()
@@ -105,29 +105,7 @@ class MainActivity : AppCompatActivity(), SelectedDateListener {
         topAppBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.update_button -> {
-                    thread {
-                        try {
-                            // where should this code go? clearly no need to ask for another readable database TODO
-                            // how to make this not completely public? TODO
-                            val inputStream = URL("https://pacificanesthesia.s3.us-west-2.amazonaws.com/schedule.db").openStream()
-                            val outputFile = File(getDatabasePath(ScheduleDatabaseHelper.DATABASE_NAME).path)
-                            val outputStream = FileOutputStream(outputFile)
-                            inputStream.copyTo(outputStream)
-                            inputStream.close()
-                            outputStream.flush()
-                            outputStream.close()
-                            Log.d("LENA", "Schedule updated")
-                            runOnUiThread {
-                                myDate.date = myDate.date
-                                Toast.makeText(this, "Schedule updated", Toast.LENGTH_SHORT).show()
-                            }
-                        } catch (exception: Exception) {
-                            Log.d("LENA", "Schedule failed to update")
-                            runOnUiThread {
-                                Toast.makeText (this, "Schedule update failed", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
+                    scheduleDatabaseHelper.updateDatabase()
                     true
                 }
                 else -> false
@@ -148,6 +126,23 @@ class MainActivity : AppCompatActivity(), SelectedDateListener {
 
     override fun selectedDateChanged(newDate: LocalDate) {
         updateDatePickerButton()
+    }
+
+    override fun onScheduleDatabaseUpdated(result: Int, version: String) {
+        runOnUiThread {
+            when (result) {
+                ScheduleDatabaseHelper.UPDATED -> {
+                    Toast.makeText(this, "Now up to date as of $version", Toast.LENGTH_SHORT).show()
+                    myDate.date = myDate.date
+                }
+                ScheduleDatabaseHelper.FAILED -> {
+                    Toast.makeText(this, "Could not establish connection", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    Toast.makeText(this, "Up to date as of $version", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
 
