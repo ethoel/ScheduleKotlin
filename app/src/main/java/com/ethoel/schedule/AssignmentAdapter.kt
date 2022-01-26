@@ -1,5 +1,6 @@
 package com.ethoel.schedule
 
+import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.color.MaterialColors
+import org.w3c.dom.Text
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -14,34 +17,146 @@ import java.time.temporal.TemporalAdjusters
 import java.util.*
 import kotlin.collections.ArrayList
 
-class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() {
+class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() {
+    var todayColumn: Int = -1
+    var selectedColumn: Int = -1
+    var selectedRow: Int = -1
     var scheduleDatabaseHelper: ScheduleDatabaseHelper? = null
     private var assignments: ArrayList<Array<String>> = arrayListOf(arrayOf("", "M", "T", "W", "T", "F", "S", "S"), Array<String>(8) { "" })
 
-    class ViewHolder(val view: View): RecyclerView.ViewHolder(view) {}
+    class ViewHolder(val view: View, val row: Int, val assignmentAdapter: AssignmentAdapter): RecyclerView.ViewHolder(view) {
+    }
 
     override fun getItemViewType(position: Int): Int {
         return when (position) {
             0 -> DAY_ROW
             1 -> DATE_ROW
-            else -> ASSIGNMENT_ROW
+            else -> position
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AssignmentAdapter.ViewHolder {
         return when (viewType) {
-            DAY_ROW -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.day_row, parent, false))
-            DATE_ROW -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.date_row, parent, false))
-            else -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.assignment_row, parent, false))
+            DAY_ROW -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.day_row, parent, false), viewType, this)
+            DATE_ROW -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.date_row, parent, false), viewType, this)
+            else -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.assignment_row, parent, false), viewType, this)
+        }.also {
+            (it.view as ViewGroup).children.forEachIndexed { index, textView ->
+                textView.setOnClickListener {
+                    selectedRow = when {
+                        index < 1 && viewType < 2 -> -1
+                        viewType < 2 -> selectedRow
+                        viewType == selectedRow && index < 1 -> -1
+                        else -> viewType
+                    }
+                    selectedColumn = when {
+                        index < 1 && viewType < 2 -> -1
+                        index < 1 -> selectedColumn
+                        index == selectedColumn && viewType < 2 -> -1
+                        else -> index
+                    }
+                    notifyDataSetChanged()
+                    Log.d("LENA", "selected row $selectedRow col $selectedColumn")
+                }
+            }
         }
     }
 
     override fun onBindViewHolder(holder: AssignmentAdapter.ViewHolder, position: Int) {
         assert((holder.view as ViewGroup).childCount == assignments[position].size)
 
-        var i = 0
-        (holder.view as ViewGroup).children.forEach { (it as TextView).text = assignments[position][i++]
+        (holder.view as ViewGroup).children.forEachIndexed { index, view ->
+            (view as TextView).text = assignments[position][index]
+
+            when {
+                index == todayColumn && (index == selectedColumn || position == selectedRow) -> {
+                    colorSelectedTodayCol(view, position)
+                }
+                position == selectedRow -> {
+                    colorSelectedRow(view, holder.view, index)
+                }
+                index == selectedColumn -> {
+                    colorSelectedCol(view, position)
+                }
+                index == todayColumn -> {
+                    colorTodayCol(view, position)
+                }
+                else -> {
+                    uncolor(view)
+                }
+            }
         }
+    }
+
+    fun colorSelectedTodayCol(view: TextView, row: Int) {
+        when (row) {
+            0 -> {
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnPrimary, Color.BLACK))
+                view.setBackgroundResource(R.drawable.today_top)
+            }
+            1 -> {
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnPrimary, Color.BLACK))
+                view.setBackgroundResource(R.drawable.today_bottom)
+            }
+            assignments.size - 1 -> {
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+                view.setBackgroundResource(R.drawable.rounded_bottom_solid)
+            }
+            else -> {
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+                view.setBackgroundColor(MaterialColors.getColor(context, R.attr.colorSecondaryContainer, Color.WHITE))
+            }
+        }
+    }
+
+    fun colorTodayCol(view: TextView, row: Int) {
+        when (row) {
+            0 -> {
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnPrimary, Color.BLACK))
+                view.setBackgroundResource(R.drawable.today_top)
+            }
+            1 -> {
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnPrimary, Color.BLACK))
+                view.setBackgroundResource(R.drawable.today_bottom_rounded)
+            }
+            else -> {
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSurface, Color.BLACK))
+                view.setBackgroundColor(MaterialColors.getColor(context, R.attr.colorSurface, Color.WHITE))
+            }
+        }
+    }
+
+    fun colorSelectedCol(view: TextView, row: Int) {
+        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+        when (row) {
+            0 -> {
+                view.setBackgroundResource(R.drawable.rounded_top_solid)
+            }
+            assignments.size - 1 -> {
+                view.setBackgroundResource(R.drawable.rounded_bottom_solid)
+            }
+            else -> {
+                view.setBackgroundColor(MaterialColors.getColor(context, R.attr.colorSecondaryContainer, Color.WHITE))
+            }
+        }
+    }
+
+    fun colorSelectedRow(view: TextView, viewGroup: ViewGroup, col: Int) {
+        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+        when (col) {
+            0 -> {
+                view.setBackgroundResource(R.drawable.rounded_left_solid)
+            } viewGroup.childCount - 1 -> {
+                view.setBackgroundResource(R.drawable.rounded_right_solid)
+            } else -> {
+                view.setBackgroundColor(MaterialColors.getColor(context, R.attr.colorSecondaryContainer, Color.WHITE))
+            }
+        }
+    }
+
+    fun uncolor(view: TextView) {
+        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSurface, Color.BLACK))
+        view.setBackgroundColor(MaterialColors.getColor(context, R.attr.colorSurface, Color.WHITE))
     }
 
     override fun getItemCount(): Int {
@@ -51,6 +166,14 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
     fun setDate(date: LocalDate) {
         val monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val sunday = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+
+        todayColumn = LocalDate.now().let { today ->
+            if (today in monday..sunday) {
+                today.dayOfMonth - monday.dayOfMonth + 1
+            } else {
+                -1
+            }
+        }
 
         var headerRows = assignments.take(2) as ArrayList<Array<String>>
 
@@ -65,7 +188,7 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
 
         // update assignments
         var assignmentRows: ArrayList<Array<String>> = ArrayList(assignments.size - 2)
-        Log.d("LENA", "about to shit from the database")
+        //Log.d("LENA", "about to get shit from the database")
         if (scheduleDatabaseHelper != null) {
             val cursor = scheduleDatabaseHelper!!.scheduleDatabase!!.rawQuery(
                 "SELECT date, anesthesiologist, assignment FROM assignments WHERE date BETWEEN ? AND ? ORDER BY anesthesiologist,date",
@@ -87,7 +210,7 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
             } while (!cursor.isAfterLast)
             cursor.close()
         }
-        Log.d("LENA", "got shit from the database ${assignmentRows.size}")
+        Log.d("LENA", "got shit from the database ${assignmentRows.size} for ${date.toString()}")
 
         if (assignmentRows.size == 0 && assignments.size > 2) {
             assignmentRows = assignments.drop(2) as ArrayList<Array<String>>
@@ -100,6 +223,10 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
 
         headerRows.addAll(assignmentRows)
         assignments = headerRows
+
+        //assignments.forEach {
+        //    Log.d("LENA", "${it[0]}")
+        //}
 
         notifyDataSetChanged()
     }
@@ -158,7 +285,6 @@ class AssignmentAdapter(): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() 
     companion object {
         const val DAY_ROW = 0
         const val DATE_ROW = 1
-        const val ASSIGNMENT_ROW = 2
 
         const val LOONEY_ORDER = 0
         const val ALPHA_LOCUM_LAST = 1

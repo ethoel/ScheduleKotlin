@@ -2,5 +2,28 @@
 <resources>
    <style name="bold_text_view_style" parent="Widget.AppCompat.TextView">
       <item name="android:textStyle">bold</item>
+      <item name="android:gravity">bottom|center_horizontal</item>
+      <item name="android:paddingTop">@dimen/inside_margin</item>
+   </style>
+   <style name="month_bold_text_view_style" parent="Widget.AppCompat.TextView">
+      <item name="android:textStyle">bold</item>
+      <item name="android:gravity">top</item>
+      <item name="android:paddingBottom">@dimen/inside_margin</item>
+   </style>
+   <style name="padded_bold_text_view_style" parent="Widget.AppCompat.TextView">
+      <item name="android:textStyle">bold</item>
+      <item name="android:gravity">top|center_horizontal</item>
+      <item name="android:paddingBottom">@dimen/inside_margin</item>
+   </style>
+   <style name="anes_text_view_style" parent="Widget.AppCompat.TextView">
+      <item name="android:minHeight">@dimen/clickable_height</item>
+      <item name="android:gravity">center_vertical</item>
+   </style>
+   <style name="normal_text_view_style" parent="Widget.AppCompat.TextView">
+      <item name="android:minHeight">@dimen/clickable_height</item>
+      <item name="android:gravity">center</item>
+   </style>
+   <style name="current_date_text_view_style" parent="normal_text_view_style">
+       <item name="android:background">#f00</item>
    </style>
 </resources>

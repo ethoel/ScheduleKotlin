@@ -20,13 +20,12 @@ class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, D
         get() {
             if (field == null) {
                 field = readableDatabase
-                field!!.execSQL("CREATE TABLE IF NOT EXISTS assignments (assignment_id INTEGER PRIMARY KEY, date TEXT NOT NULL, anesthesiologist TEXT NOT NULL, assignment TEXT NOT NULL, UNIQUE(date, anesthesiologist))")
             }
             return field
         }
 
     @Synchronized
-    private fun updateDatabaseAsNeeded() {
+    private fun updateDatabaseAsNeeded(verbose: Boolean) {
         var onlineVersion: String = ""
         try {
             val versionReader = URL("https://pacificanesthesia.s3.us-west-2.amazonaws.com/version.txt").openConnection().run {
@@ -34,23 +33,23 @@ class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, D
                         BufferedReader(InputStreamReader(getInputStream())) }
             onlineVersion = versionReader.readLine().trim()
             versionReader.close()
-            Log.d("LENA", "Version retrieved successfully")
+            //Log.d("LENA", "Version retrieved successfully")
         } catch (e: Exception) {
-            invokeOnDatabaseUpdated(FAILED)
-            Log.d("LENA", "Could not retrieve version number: ${e.message}")
+            invokeOnDatabaseUpdated(verbose, FAILED)
+            //Log.d("LENA", "Could not retrieve version number: ${e.message}")
             return
         }
 
         if (preferences.getString(DATABASE_NAME, "")!! < onlineVersion) {
             try {
-                Log.d("LENA", "Update from old to new version")
+                //Log.d("LENA", "Update from old to new version")
                 val inputStream: InputStream = URL("https://pacificanesthesia.s3.us-west-2.amazonaws.com/schedule.db").openConnection().run {
                     addRequestProperty("User-Agent", "PAStAnne")
                     getInputStream() }
-                Log.d("LENA", "Got input stream")
+                //Log.d("LENA", "Got input stream")
                 context.deleteDatabase(DATABASE_NAME)
                 val outputStream = FileOutputStream(File(context.getDatabasePath(ScheduleDatabaseHelper.DATABASE_NAME).path))
-                Log.d("LENA", "Got output stream")
+                //Log.d("LENA", "Got output stream")
                 inputStream.copyTo(outputStream)
                 inputStream.close()
                 outputStream.flush()
@@ -59,22 +58,22 @@ class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, D
                     putString(DATABASE_NAME, onlineVersion)
                     apply()
                 }
-                Log.d("LENA", "Schedule updated")
+                //Log.d("LENA", "Schedule updated")
                 scheduleDatabase?.close()
                 scheduleDatabase = readableDatabase
-                invokeOnDatabaseUpdated(UPDATED, onlineVersion)
+                invokeOnDatabaseUpdated(verbose, UPDATED, onlineVersion)
             } catch (e: Exception) {
-                Log.d("LENA", "Schedule failed to update ${e.message}")
-                invokeOnDatabaseUpdated(FAILED)
+                //Log.d("LENA", "Schedule failed to update ${e.message}")
+                invokeOnDatabaseUpdated(verbose, FAILED)
             }
         } else {
-            Log.d("LENA", "Already up to date")
-            invokeOnDatabaseUpdated(ALREADY_UP_TO_DATE, preferences.getString(DATABASE_NAME, "")!!)
+            //Log.d("LENA", "Already up to date")
+            invokeOnDatabaseUpdated(verbose, ALREADY_UP_TO_DATE, preferences.getString(DATABASE_NAME, "")!!)
         }
     }
 
-    private fun invokeOnDatabaseUpdated(result: Int, version: String = "") {
-        listeners.forEach { it.onScheduleDatabaseUpdated(result, version) }
+    private fun invokeOnDatabaseUpdated(verbose: Boolean, result: Int, version: String = "") {
+        listeners.forEach { it.onScheduleDatabaseUpdated(verbose, result, version) }
     }
 
 
@@ -83,7 +82,9 @@ class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, D
     }
 
     override fun getReadableDatabase(): SQLiteDatabase {
-        return super.getReadableDatabase()
+        return super.getReadableDatabase().apply {
+            execSQL("CREATE TABLE IF NOT EXISTS assignments (assignment_id INTEGER PRIMARY KEY, date TEXT NOT NULL, anesthesiologist TEXT NOT NULL, assignment TEXT NOT NULL, UNIQUE(date, anesthesiologist))")
+        }
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -98,8 +99,13 @@ class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, D
         listeners.add(listener)
     }
 
-    fun updateDatabase() {
-        thread {  updateDatabaseAsNeeded() }
+    fun updateDatabase(verbose: Boolean) {
+        thread {  updateDatabaseAsNeeded(verbose) }
+    }
+
+    fun restoreDatabase() {
+        scheduleDatabase?.close()
+        scheduleDatabase = readableDatabase
     }
 
     companion object {
@@ -112,5 +118,5 @@ class ScheduleDatabaseHelper(val context: Context) : SQLiteOpenHelper(context, D
 }
 
 interface ScheduleDatabaseListener {
-    fun onScheduleDatabaseUpdated(result: Int, version: String)
+    fun onScheduleDatabaseUpdated(verbose: Boolean, result: Int, version: String)
 }

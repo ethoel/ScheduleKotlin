@@ -2,6 +2,8 @@ package com.ethoel.schedule
 
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.RippleDrawable
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -41,33 +43,54 @@ class MainActivity : AppCompatActivity(), SelectedDateListener, ScheduleDatabase
         setContentView(R.layout.activity_main)
         scheduleDatabaseHelper = ScheduleDatabaseHelper(this).also {
             it.addListener(this)
-            it.updateDatabase()
+            it.updateDatabase(false)
         }
-        initializeViewPager()
+        initializeViewPager(savedInstanceState)
         initializeTopAppBar()
         initializeSystemNavigationBar()
         initializeDatePicker()
         initializeDateButtons()
 
-        myDate.date = LocalDate.now()
+        if (savedInstanceState != null) {
+            myDate.date = LocalDate.parse(savedInstanceState.getString("selected_date"))
+        } else {
+            myDate.date = LocalDate.now()
+        }
+        Log.d("LENA", "onCreate()")
     }
 
-    fun initializeViewPager() {
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("selected_date", myDate.date.toString())
+    }
+
+    //override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    //    super.onRestoreInstanceState(savedInstanceState)
+    //    myDate = SelectedDate().also { it.addListener(this) }
+    //    scheduleDatabaseHelper = ScheduleDatabaseHelper(this).also {
+    //        it.addListener(this)
+    //        it.restoreDatabase()
+    //    }
+    //    myDate.date = LocalDate.parse(savedInstanceState.getString("selected_date"))
+    //}
+
+    fun initializeViewPager(savedInstanceState: Bundle?) {
         viewPager = findViewById<ViewPager2>(R.id.schedule_view_pager).also { pager ->
-            pager.adapter = SchedulePageAdapter(this, myDate.date).also { myDate.addListener(it) }
+            //pager.adapter = SchedulePageAdapter(this, myDate.date).also { myDate.addListener(it) }
+            pager.adapter = WeekPageAdapter(this, myDate.date).also { myDate.addListener(it) }
             pager.setCurrentItem(1, false)
             pager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
                 override fun onPageScrollStateChanged(state: Int) {
                     super.onPageScrollStateChanged(state)
                     if (state == ViewPager2.SCROLL_STATE_IDLE) {
                         when (pager.currentItem) {
-                            SchedulePageAdapter.PREVIOUS_PAGE -> {
+                            WeekPageAdapter.PREVIOUS_PAGE -> {
                                 myDate.date = myDate.date.minusWeeks(1)
-                                pager.setCurrentItem(SchedulePageAdapter.CURRENT_PAGE, false)
+                                pager.setCurrentItem(WeekPageAdapter.CURRENT_PAGE, false)
                             }
-                            SchedulePageAdapter.NEXT_PAGE -> {
+                            WeekPageAdapter.NEXT_PAGE -> {
                                 myDate.date = myDate.date.plusWeeks(1)
-                                pager.setCurrentItem(SchedulePageAdapter.CURRENT_PAGE, false)
+                                pager.setCurrentItem(WeekPageAdapter.CURRENT_PAGE, false)
                             }
                         }
                     }
@@ -105,7 +128,7 @@ class MainActivity : AppCompatActivity(), SelectedDateListener, ScheduleDatabase
         topAppBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.update_button -> {
-                    scheduleDatabaseHelper.updateDatabase()
+                    scheduleDatabaseHelper.updateDatabase(true)
                     true
                 }
                 else -> false
@@ -128,7 +151,7 @@ class MainActivity : AppCompatActivity(), SelectedDateListener, ScheduleDatabase
         updateDatePickerButton()
     }
 
-    override fun onScheduleDatabaseUpdated(result: Int, version: String) {
+    override fun onScheduleDatabaseUpdated(verbose: Boolean, result: Int, version: String) {
         runOnUiThread {
             when (result) {
                 ScheduleDatabaseHelper.UPDATED -> {
@@ -136,10 +159,12 @@ class MainActivity : AppCompatActivity(), SelectedDateListener, ScheduleDatabase
                     myDate.date = myDate.date
                 }
                 ScheduleDatabaseHelper.FAILED -> {
-                    Toast.makeText(this, "Could not establish connection", Toast.LENGTH_SHORT).show()
+                    if (verbose)
+                        Toast.makeText(this, "Could not establish connection", Toast.LENGTH_SHORT).show()
                 }
                 else -> {
-                    Toast.makeText(this, "Up to date as of $version", Toast.LENGTH_SHORT).show()
+                    if (verbose)
+                        Toast.makeText(this, "Up to date as of $version", Toast.LENGTH_SHORT).show()
                 }
             }
         }

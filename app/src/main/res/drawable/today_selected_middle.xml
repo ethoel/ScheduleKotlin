@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<item>
+    <shape android:shape="rectangle">
+        <solid android:color="?attr/colorSecondaryContainer"></solid>
+        <stroke android:color="?attr/colorOutline"
+            android:width="@dimen/stroke_width"></stroke>
+    </shape>
+</item>
+<item android:height="@dimen/stroke_width"
+    android:gravity="bottom"
+    android:left="@dimen/stroke_correction"
+    android:right="@dimen/stroke_correction">
+    <shape android:shape="rectangle" >
+        <solid android:color="?attr/colorSecondaryContainer"></solid>
+    </shape>
+</item>
+<item android:height="@dimen/stroke_width"
+    android:gravity="top"
+    android:left="@dimen/stroke_correction"
+    android:right="@dimen/stroke_correction">
+    <shape android:shape="rectangle" >
+        <solid android:color="?attr/colorSecondaryContainer"></solid>
+    </shape>
+</item>
+</layer-list>

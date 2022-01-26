@@ -1,3 +1,7 @@
+/*
+import com.ethoel.schedule.AssignmentAdapter
+import com.ethoel.schedule.R
+
 package com.ethoel.schedule
 
 import android.os.Bundle
@@ -18,8 +22,10 @@ class SchedulePageFragment(scrollListener: RecyclerView.OnScrollListener? = null
         private set
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        schedulePageView = inflater.inflate(R.layout.schedule_page, container, false) as RecyclerView
-        schedulePageView!!.layoutManager = object: LinearLayoutManager(this.context) {
+        Log.d("LENA", "first create")
+        schedulePageView =
+            inflater.inflate(R.layout.schedule_page, container, false) as RecyclerView
+        schedulePageView!!.layoutManager = object : LinearLayoutManager(this.context) {
             override fun onLayoutCompleted(state: RecyclerView.State?) {
                 super.onLayoutCompleted(state)
                 //works but delayed by one cycle! need to also uncomment line in schedulePageAdapter
@@ -33,4 +39,4 @@ class SchedulePageFragment(scrollListener: RecyclerView.OnScrollListener? = null
         listener?.let { schedulePageView!!.addOnScrollListener(it) }
         return schedulePageView!!
     }
-}
+}*/

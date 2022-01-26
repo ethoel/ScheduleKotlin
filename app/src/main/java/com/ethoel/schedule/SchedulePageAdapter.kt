@@ -1,3 +1,4 @@
+/*
 package com.ethoel.schedule
 
 import android.util.Log
@@ -12,15 +13,18 @@ import java.time.LocalDate
 class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): FragmentStateAdapter(activity), SelectedDateListener  {
     private var previousPage = SchedulePageFragment().apply { assignmentAdapter.scheduleDatabaseHelper = (activity as MainActivity).scheduleDatabaseHelper; assignmentAdapter.setDate(date.minusWeeks(1))  }
     private var nextPage = SchedulePageFragment().apply { assignmentAdapter.scheduleDatabaseHelper = (activity as MainActivity).scheduleDatabaseHelper; assignmentAdapter.setDate(date.plusWeeks(1))  }
-    private var schedulePageFragments: Array<SchedulePageFragment> =
-    arrayOf(
-        previousPage,
+    private var currentPage =
         SchedulePageFragment(object: RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 //position = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             }
-        }).apply { assignmentAdapter.scheduleDatabaseHelper = (activity as MainActivity).scheduleDatabaseHelper; assignmentAdapter.setDate(date) },
+        }).apply { assignmentAdapter.scheduleDatabaseHelper = (activity as MainActivity).scheduleDatabaseHelper; assignmentAdapter.setDate(date) }
+
+    private var schedulePageFragments: Array<SchedulePageFragment> =
+    arrayOf(
+        previousPage,
+        currentPage,
         nextPage)
 
     override fun getItemCount(): Int {
@@ -44,4 +48,4 @@ class SchedulePageAdapter(activity: AppCompatActivity, date: LocalDate): Fragmen
         schedulePageFragments[CURRENT_PAGE].assignmentAdapter.setDate(selectedDate)
         schedulePageFragments[NEXT_PAGE].assignmentAdapter.setDate(selectedDate.plusWeeks(1))
     }
-}
+}*/
