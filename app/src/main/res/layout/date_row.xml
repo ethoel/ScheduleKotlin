@@ -7,6 +7,7 @@
 
     <TextView
         style="@style/month_bold_text_view_style"
+        android:paddingLeft="@dimen/inside_margin"
         android:id="@+id/textView0"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

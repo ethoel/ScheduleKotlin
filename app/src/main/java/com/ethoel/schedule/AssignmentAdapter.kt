@@ -9,10 +9,10 @@ import android.widget.TextView
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.color.MaterialColors
-import org.w3c.dom.Text
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.util.*
 import kotlin.collections.ArrayList
@@ -69,8 +69,11 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
             (view as TextView).text = assignments[position][index]
 
             when {
+                index == selectedColumn && position == selectedRow -> {
+                    colorSelectedIntersection(view, assignments.size - 1 == position, holder.view.childCount - 1 == index)
+                }
                 index == todayColumn && (index == selectedColumn || position == selectedRow) -> {
-                    colorSelectedTodayCol(view, position)
+                    colorSelectedTodayCol(view, position, holder.view.childCount - 1 == index)
                 }
                 position == selectedRow -> {
                     colorSelectedRow(view, holder.view, index)
@@ -88,7 +91,22 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
         }
     }
 
-    fun colorSelectedTodayCol(view: TextView, row: Int) {
+    fun colorSelectedIntersection(view: TextView, isLastRow: Boolean, isLastColumn: Boolean) {
+        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnTertiary, Color.BLACK))
+        when {
+            isLastRow -> {
+                view.setBackgroundResource(R.drawable.selected_intersection_bottom)
+            }
+            isLastColumn -> {
+                view.setBackgroundResource(R.drawable.selected_intersection_right)
+            }
+            else -> {
+                view.setBackgroundResource(R.drawable.selected_intersection_middle)
+            }
+        }
+    }
+
+    fun colorSelectedTodayCol(view: TextView, row: Int, isLastColumn: Boolean) {
         when (row) {
             0 -> {
                 view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnPrimary, Color.BLACK))
@@ -98,13 +116,20 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
                 view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnPrimary, Color.BLACK))
                 view.setBackgroundResource(R.drawable.today_bottom)
             }
+            selectedRow -> {
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+                if (isLastColumn)
+                    view.setBackgroundResource(R.drawable.selected_horizontal_right)
+                else
+                    view.setBackgroundResource(R.drawable.selected_horizontal_middle)
+            }
             assignments.size - 1 -> {
                 view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
-                view.setBackgroundResource(R.drawable.rounded_bottom_solid)
+                view.setBackgroundResource(R.drawable.selected_vertical_bottom)
             }
             else -> {
                 view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
-                view.setBackgroundColor(MaterialColors.getColor(context, R.attr.colorSecondaryContainer, Color.WHITE))
+                view.setBackgroundResource(R.drawable.selected_vertical_middle)
             }
         }
     }
@@ -130,13 +155,13 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
         view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
         when (row) {
             0 -> {
-                view.setBackgroundResource(R.drawable.rounded_top_solid)
+                view.setBackgroundResource(R.drawable.selected_vertical_top)
             }
             assignments.size - 1 -> {
-                view.setBackgroundResource(R.drawable.rounded_bottom_solid)
+                view.setBackgroundResource(R.drawable.selected_vertical_bottom)
             }
             else -> {
-                view.setBackgroundColor(MaterialColors.getColor(context, R.attr.colorSecondaryContainer, Color.WHITE))
+                view.setBackgroundResource(R.drawable.selected_vertical_middle)
             }
         }
     }
@@ -145,11 +170,11 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
         view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
         when (col) {
             0 -> {
-                view.setBackgroundResource(R.drawable.rounded_left_solid)
+                view.setBackgroundResource(R.drawable.selected_horizontal_left)
             } viewGroup.childCount - 1 -> {
-                view.setBackgroundResource(R.drawable.rounded_right_solid)
+                view.setBackgroundResource(R.drawable.selected_horizontal_right)
             } else -> {
-                view.setBackgroundColor(MaterialColors.getColor(context, R.attr.colorSecondaryContainer, Color.WHITE))
+                view.setBackgroundResource(R.drawable.selected_horizontal_middle)
             }
         }
     }
@@ -169,7 +194,8 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
 
         todayColumn = LocalDate.now().let { today ->
             if (today in monday..sunday) {
-                today.dayOfMonth - monday.dayOfMonth + 1
+                //Log.d("LENA", "ChronoUnit ${ChronoUnit.DAYS.between(monday, today).toInt() + 1}")
+                ChronoUnit.DAYS.between(monday, today).toInt() + 1
             } else {
                 -1
             }
