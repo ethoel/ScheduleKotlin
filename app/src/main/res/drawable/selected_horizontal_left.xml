@@ -6,7 +6,7 @@
 
     <corners android:topLeftRadius="@dimen/rounded_corner"
         android:bottomLeftRadius="@dimen/rounded_corner"></corners>
-    <solid android:color="?attr/colorSecondaryContainer"></solid>
+    <solid android:color="?attr/colorTertiaryContainer"></solid>
 <size android:height="@dimen/highlight_girth"></size>
     </shape>
     </item>

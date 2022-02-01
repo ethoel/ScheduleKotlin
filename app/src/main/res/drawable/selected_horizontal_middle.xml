@@ -4,7 +4,7 @@
     <shape
         android:shape="rectangle">
 
-        <solid android:color="?attr/colorSecondaryContainer"></solid>
+        <solid android:color="?attr/colorTertiaryContainer"></solid>
         <size android:height="@dimen/highlight_girth"></size>
     </shape>
 </item>

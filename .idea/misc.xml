@@ -16,9 +16,14 @@
         <entry key="app/src/main/res/drawable/rounded_top_stroke.xml" value="0.20729166666666668" />
         <entry key="app/src/main/res/drawable/schedule_spinner.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/selected_horizontal_middle.xml" value="0.20729166666666668" />
+        <entry key="app/src/main/res/drawable/selected_horizontal_right.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/selected_intersection.xml" value="0.20729166666666668" />
         <entry key="app/src/main/res/drawable/selected_intersection_bottom.xml" value="0.225" />
+        <entry key="app/src/main/res/drawable/selected_intersection_middle.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/selected_intersection_right.xml" value="0.225" />
+        <entry key="app/src/main/res/drawable/selected_vertical_bottom.xml" value="0.225" />
+        <entry key="app/src/main/res/drawable/selected_vertical_middle.xml" value="0.225" />
+        <entry key="app/src/main/res/drawable/selected_vertical_top.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/side_stroke.xml" value="0.221875" />
         <entry key="app/src/main/res/drawable/spinner_background.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/spinner_popup_background.xml" value="0.3880208333333333" />

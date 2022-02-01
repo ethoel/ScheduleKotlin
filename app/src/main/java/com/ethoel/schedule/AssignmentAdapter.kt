@@ -117,18 +117,18 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
                 view.setBackgroundResource(R.drawable.today_bottom)
             }
             selectedRow -> {
-                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnTertiaryContainer, Color.BLACK))
                 if (isLastColumn)
                     view.setBackgroundResource(R.drawable.selected_horizontal_right)
                 else
                     view.setBackgroundResource(R.drawable.selected_horizontal_middle)
             }
             assignments.size - 1 -> {
-                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnTertiaryContainer, Color.BLACK))
                 view.setBackgroundResource(R.drawable.selected_vertical_bottom)
             }
             else -> {
-                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+                view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnTertiaryContainer, Color.BLACK))
                 view.setBackgroundResource(R.drawable.selected_vertical_middle)
             }
         }
@@ -152,7 +152,7 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
     }
 
     fun colorSelectedCol(view: TextView, row: Int) {
-        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnTertiaryContainer, Color.BLACK))
         when (row) {
             0 -> {
                 view.setBackgroundResource(R.drawable.selected_vertical_top)
@@ -167,7 +167,7 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
     }
 
     fun colorSelectedRow(view: TextView, viewGroup: ViewGroup, col: Int) {
-        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondaryContainer, Color.BLACK))
+        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnTertiaryContainer, Color.BLACK))
         when (col) {
             0 -> {
                 view.setBackgroundResource(R.drawable.selected_horizontal_left)

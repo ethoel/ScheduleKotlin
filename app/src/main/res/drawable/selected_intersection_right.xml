@@ -3,7 +3,7 @@
 <item android:gravity="center_horizontal">
     <shape
         android:shape="rectangle">
-        <solid android:color="?attr/colorSecondaryContainer"></solid>
+        <solid android:color="?attr/colorTertiaryContainer"></solid>
         <size android:width="@dimen/highlight_girth"></size>
     </shape>
 </item>
@@ -11,7 +11,7 @@
     <shape
         android:shape="rectangle">
 
-        <solid android:color="?attr/colorSecondaryContainer"></solid>
+        <solid android:color="?attr/colorTertiaryContainer"></solid>
         <size android:height="@dimen/highlight_girth"></size>
         <corners android:topRightRadius="@dimen/rounded_corner"
             android:bottomRightRadius="@dimen/rounded_corner"></corners>
