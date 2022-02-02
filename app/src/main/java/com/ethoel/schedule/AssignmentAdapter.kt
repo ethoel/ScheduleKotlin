@@ -92,8 +92,11 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
     }
 
     fun colorSelectedIntersection(view: TextView, isLastRow: Boolean, isLastColumn: Boolean) {
-        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnTertiary, Color.BLACK))
+        view.setTextColor(MaterialColors.getColor(context, R.attr.colorOnSecondary, Color.WHITE))
         when {
+            isLastColumn && isLastRow -> {
+                view.setBackgroundResource(R.drawable.selected_intersection_bottomright)
+            }
             isLastRow -> {
                 view.setBackgroundResource(R.drawable.selected_intersection_bottom)
             }

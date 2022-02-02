@@ -3,6 +3,7 @@
     <dimen name="schedule_margin">16dp</dimen>
     <dimen name="inside_margin">8dp</dimen>
     <dimen name="clickable_height">36dp</dimen>
+    <dimen name="intersection_girth">32dp</dimen>
     <dimen name="highlight_girth">28dp</dimen>
     <dimen name="half_girth">14dp</dimen>
     <dimen name="rounded_corner">4dp</dimen>

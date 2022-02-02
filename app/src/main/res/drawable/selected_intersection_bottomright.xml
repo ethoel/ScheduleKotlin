@@ -15,6 +15,8 @@
 
         <solid android:color="?attr/colorSecondaryContainer"></solid>
         <size android:height="@dimen/highlight_girth"></size>
+        <corners android:topRightRadius="@dimen/rounded_corner"
+            android:bottomRightRadius="@dimen/rounded_corner"></corners>
     </shape>
 </item>
 <item android:gravity="center">

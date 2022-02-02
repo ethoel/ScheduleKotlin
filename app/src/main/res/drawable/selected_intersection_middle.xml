@@ -11,16 +11,17 @@
         <shape
             android:shape="rectangle">
 
-            <solid android:color="?attr/colorTertiaryContainer"></solid>
+            <solid android:color="?attr/colorSecondaryContainer"></solid>
             <size android:height="@dimen/highlight_girth"></size>
         </shape>
     </item>
 <item android:gravity="center">
     <shape
-        android:shape="oval">
-        <solid android:color="?attr/colorTertiary"></solid>
-        <size android:height="@dimen/highlight_girth"
-            android:width="@dimen/highlight_girth"></size>
+        android:shape="rectangle">
+        <solid android:color="?attr/colorSecondary"></solid>
+        <corners android:radius="@dimen/rounded_corner"></corners>
+        <size android:height="@dimen/intersection_girth"
+            android:width="@dimen/intersection_girth"></size>
     </shape>
 </item>
 </layer-list>
