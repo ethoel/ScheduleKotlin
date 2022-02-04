@@ -6,6 +6,8 @@
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/highlighted_vertical_middle.xml" value="0.20729166666666668" />
         <entry key="app/src/main/res/drawable/ic_baseline_edit_calendar_24.xml" value="0.225" />
+        <entry key="app/src/main/res/drawable/ic_baseline_today_24.xml" value="0.221875" />
+        <entry key="app/src/main/res/drawable/ic_baseline_update2_24.xml" value="0.221875" />
         <entry key="app/src/main/res/drawable/ic_baseline_update_24.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/rounded_bottom_solid.xml" value="0.20729166666666668" />

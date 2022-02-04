@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 <item android:gravity="center_vertical">
+    <inset android:insetRight="@dimen/right_inset">
     <shape
 android:shape="rectangle">
 
@@ -8,6 +9,6 @@ android:shape="rectangle">
     android:bottomRightRadius="@dimen/rounded_corner"></corners>
 <solid android:color="?attr/colorSecondaryContainer"></solid>
     <size android:height="@dimen/highlight_girth"></size>
-</shape>
+</shape></inset>
     </item>
     </layer-list>

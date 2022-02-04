@@ -18,9 +18,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<AssignmentAdapter.ViewHolder>() {
+    var weekMonday: LocalDate = LocalDate.now()
     var todayColumn: Int = -1
-    var selectedColumn: Int = -1
-    var selectedRow: Int = -1
     var scheduleDatabaseHelper: ScheduleDatabaseHelper? = null
     private var assignments: ArrayList<Array<String>> = arrayListOf(arrayOf("", "M", "T", "W", "T", "F", "S", "S"), Array<String>(8) { "" })
 
@@ -53,10 +52,14 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
                         index < 1 && viewType < 2 -> -1
                         index < 1 -> selectedColumn
                         index == selectedColumn && viewType < 2 -> -1
-                        else -> index
+                        else -> {
+                            Log.d("LENA", "index $index")
+                            context.myDate.date = weekMonday.plusDays((index - 1).toLong())
+                            index
+                        }
                     }
                     notifyDataSetChanged()
-                    Log.d("LENA", "selected row $selectedRow col $selectedColumn")
+                    //Log.d("LENA", "selected row $selectedRow col $selectedColumn")
                 }
             }
         }
@@ -195,6 +198,8 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
         val monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val sunday = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
+        weekMonday = monday
+
         todayColumn = LocalDate.now().let { today ->
             if (today in monday..sunday) {
                 //Log.d("LENA", "ChronoUnit ${ChronoUnit.DAYS.between(monday, today).toInt() + 1}")
@@ -202,6 +207,10 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
             } else {
                 -1
             }
+        }
+
+        if (selectedColumn != -1) {
+            selectedColumn = ChronoUnit.DAYS.between(monday, date).toInt() + 1
         }
 
         var headerRows = assignments.take(2) as ArrayList<Array<String>>
@@ -312,6 +321,9 @@ class AssignmentAdapter(val context: MainActivity): RecyclerView.Adapter<Assignm
     }
 
     companion object {
+        var selectedColumn: Int = -1
+        var selectedRow: Int = -1
+
         const val DAY_ROW = 0
         const val DATE_ROW = 1
 

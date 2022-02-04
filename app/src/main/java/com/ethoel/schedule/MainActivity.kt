@@ -131,6 +131,10 @@ class MainActivity : AppCompatActivity(), SelectedDateListener, ScheduleDatabase
                     scheduleDatabaseHelper.updateDatabase(true)
                     true
                 }
+                R.id.today_button -> {
+                    myDate.date = LocalDate.now()
+                    true
+                }
                 else -> false
             }
         }

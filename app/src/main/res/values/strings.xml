@@ -13,4 +13,6 @@
     <string name="content_description_update">Update to latest assignments</string>
     <string name="content_description_date_picker">Choose a different date</string>
     <string name="change_date">Change date</string>
+    <string name="content_description_today">Go to today</string>
+    <string name="today">Today</string>
 </resources>

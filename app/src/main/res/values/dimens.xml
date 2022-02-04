@@ -9,4 +9,5 @@
     <dimen name="rounded_corner">4dp</dimen>
     <dimen name="stroke_width">1dp</dimen>
     <dimen name="stroke_correction">1.25dp</dimen>
+    <dimen name="right_inset">2dp</dimen>
 </resources>

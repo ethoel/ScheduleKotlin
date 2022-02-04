@@ -8,6 +8,7 @@
     </shape>
 </item>
 <item android:gravity="center_vertical">
+    <inset android:insetRight="@dimen/right_inset">
     <shape
         android:shape="rectangle">
 
@@ -15,7 +16,7 @@
         <size android:height="@dimen/highlight_girth"></size>
         <corners android:topRightRadius="@dimen/rounded_corner"
             android:bottomRightRadius="@dimen/rounded_corner"></corners>
-    </shape>
+    </shape></inset>
 </item>
 <item android:gravity="center">
     <shape
